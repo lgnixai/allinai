@@ -1,0 +1,15 @@
+.idea
+.vscode
+upload
+*.exe
+*.db
+build
+*.db-journal
+logs
+app.log
+one-api
+.DS_Store
+tiktoken_cachetmp/
+tmp/
+web/.idea
+.idea

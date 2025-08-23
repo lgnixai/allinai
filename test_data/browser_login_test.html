@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录测试 - 话题页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .success {
+            color: green;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        #userInfo {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>登录测试 - 话题页面</h1>
+        
+        <div class="info">
+            <h3>说明：</h3>
+            <p>1. 使用此页面登录后，可以访问话题页面</p>
+            <p>2. 登录成功后点击"前往话题页面"按钮</p>
+            <p>3. 或者直接访问: <a href="http://localhost:5173/console/topic" target="_blank">http://localhost:5173/console/topic</a></p>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">手机号：</label>
+            <input type="text" id="phone" value="13800138001" placeholder="请输入手机号">
+        </div>
+
+        <div class="form-group">
+            <label for="password">密码：</label>
+            <input type="password" id="password" value="12345678" placeholder="请输入密码">
+        </div>
+
+        <button onclick="login()">登录</button>
+        <button onclick="checkLoginStatus()">检查登录状态</button>
+        <button onclick="goToTopicPage()">前往话题页面</button>
+        <button onclick="logout()">退出登录</button>
+
+        <div id="message"></div>
+        <div id="userInfo"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000';
+        
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        function showUserInfo(info) {
+            const userInfoDiv = document.getElementById('userInfo');
+            userInfoDiv.innerHTML = `<h4>用户信息：</h4><pre>${JSON.stringify(info, null, 2)}</pre>`;
+        }
+
+        async function login() {
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+
+            if (!phone || !password) {
+                showMessage('请输入手机号和密码', 'error');
+                return;
+            }
+
+            try {
+                showMessage('正在登录...', 'info');
+                
+                const response = await fetch(`${API_BASE}/api/user/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success !== false && data.data) {
+                    // 登录成功
+                    const user = data.data;
+                    localStorage.setItem('access_token', user.access_token);
+                    localStorage.setItem('user_id', user.id.toString());
+                    localStorage.setItem('user_info', JSON.stringify(user));
+                    
+                    showMessage('登录成功！', 'success');
+                    showUserInfo(user);
+                } else {
+                    showMessage(`登录失败: ${data.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(`登录失败: ${error.message}`, 'error');
+            }
+        }
+
+        function checkLoginStatus() {
+            const token = localStorage.getItem('access_token');
+            const userId = localStorage.getItem('user_id');
+            const userInfo = localStorage.getItem('user_info');
+
+            if (token && userId) {
+                showMessage('用户已登录', 'success');
+                if (userInfo) {
+                    try {
+                        showUserInfo(JSON.parse(userInfo));
+                    } catch (e) {
+                        showMessage('用户信息解析失败', 'error');
+                    }
+                }
+            } else {
+                showMessage('用户未登录', 'error');
+                document.getElementById('userInfo').innerHTML = '';
+            }
+        }
+
+        function goToTopicPage() {
+            const token = localStorage.getItem('access_token');
+            const userId = localStorage.getItem('user_id');
+
+            if (!token || !userId) {
+                showMessage('请先登录', 'error');
+                return;
+            }
+
+            window.open('http://localhost:5173/console/topic', '_blank');
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('user_info');
+            showMessage('已退出登录', 'info');
+            document.getElementById('userInfo').innerHTML = '';
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            checkLoginStatus();
+        };
+    </script>
+</body>
+</html>
+
+
+

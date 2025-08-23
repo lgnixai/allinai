@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>登录测试</title>
+</head>
+<body>
+    <h1>登录状态测试</h1>
+    <div id="status"></div>
+    <script>
+        const token = localStorage.getItem("access_token");
+        const userId = localStorage.getItem("user_id");
+        document.getElementById("status").innerHTML = `
+            <p>Token: ${token || "未找到"}</p>
+            <p>UserID: ${userId || "未找到"}</p>
+            <p>状态: ${token && userId ? "已登录" : "未登录"}</p>
+        `;
+    </script>
+</body>
+</html>

@@ -163,9 +163,16 @@ func chooseDB(envName string, isLog bool) (*gorm.DB, error) {
 	// Use SQLite
 	common.SysLog("SQL_DSN not set, using SQLite as database")
 	common.UsingSQLite = true
-	return gorm.Open(sqlite.Open(common.SQLitePath), &gorm.Config{
+	db, err := gorm.Open(sqlite.Open(common.SQLitePath), &gorm.Config{
 		PrepareStmt: true, // precompile SQL
 	})
+	if err == nil && !isLog {
+		// 启用外键约束
+		sqlDB, _ := db.DB()
+		sqlDB.Exec("PRAGMA foreign_keys=ON;")
+		common.SysLog("SQLite foreign keys enabled")
+	}
+	return db, err
 }
 
 func InitDB() (err error) {
@@ -190,7 +197,21 @@ func InitDB() (err error) {
 			//_, _ = sqlDB.Exec("ALTER TABLE channels MODIFY model_mapping TEXT;") // TODO: delete this line when most users have upgraded
 		}
 		common.SysLog("database migration started")
+
 		err = migrateDB()
+
+		// 设置SQLite钩子
+		SetupSQLiteHooks()
+
+		// 创建带外键约束的表
+		if err := CreateTablesWithForeignKeys(); err != nil {
+			common.SysLog("warning: failed to create tables with foreign keys: " + err.Error())
+		}
+
+		// 检查并修复外键约束
+		if err := CheckAndFixForeignKeys(); err != nil {
+			common.SysLog("warning: failed to check/fix foreign keys: " + err.Error())
+		}
 		return err
 	} else {
 		common.FatalLog(err)
@@ -276,6 +297,7 @@ func migrateDBFast() error {
 		{&QuotaData{}, "QuotaData"},
 		{&Task{}, "Task"},
 		{&Setup{}, "Setup"},
+		// 跳过有外键约束的模型，由SQLite钩子处理
 		// {&Subscription{}, "Subscription"},
 		// {&SubscriptionArticle{}, "SubscriptionArticle"},
 		// {&Topic{}, "Topic"},
@@ -304,6 +326,7 @@ func migrateDBFast() error {
 			return err
 		}
 	}
+
 	common.SysLog("database migrated")
 	return nil
 }

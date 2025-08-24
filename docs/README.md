@@ -6,7 +6,8 @@
 docs/
 ├── README.md                    # 本文档
 ├── API_Documentation.md         # API接口文档
-└── Postman_Usage_Guide.md       # Postman使用指南
+├── Postman_Usage_Guide.md       # Postman使用指南
+└── Deployment_Guide.md          # 部署指南
 
 postman/
 ├── One-API_Collection.json      # Postman测试集合
@@ -26,6 +27,10 @@ postman/
    - `One-API_Environment.json` - 环境配置
 
 2. 按照 [Postman_Usage_Guide.md](./Postman_Usage_Guide.md) 的说明进行测试
+
+### 3. 部署应用
+
+按照 [Deployment_Guide.md](./Deployment_Guide.md) 的说明在新环境中部署应用。
 
 ## 主要功能模块
 
@@ -64,3 +69,4 @@ postman/
 - 2024-01-01: 创建文档结构
 - 2024-01-01: 添加用户、话题、订阅API文档
 - 2024-01-01: 创建Postman测试集合
+- 2024-01-01: 添加部署指南，解决新环境部署问题

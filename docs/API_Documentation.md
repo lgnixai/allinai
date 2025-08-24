@@ -407,34 +407,7 @@ GET /api/phone_verification?phone=13800138000&purpose=register
   "message": "订阅已取消"
 }
 ```
-
-### 3.4 重新激活订阅
-
-**接口地址**: `PUT /api/subscriptions/{id}/reactivate`
-
-**请求头**: 需要认证token和UserID
-
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "订阅已重新激活"
-}
-```
-
-### 3.5 删除订阅
-
-**接口地址**: `DELETE /api/subscriptions/{id}`
-
-**请求头**: 需要认证token和UserID
-
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "订阅已删除"
-}
-```
+ 
 
 ### 3.6 获取订阅文章
 

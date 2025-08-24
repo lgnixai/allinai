@@ -30,3 +30,4 @@ ReadWritePaths=/path/to/your/project/logs /path/to/your/project/data
 
 [Install]
 WantedBy=multi-user.target
+

@@ -106,8 +106,8 @@
 									"if (pm.response.code === 200) {",
 									"    const response = pm.response.json();",
 									"    if (response.success && response.data) {",
-									"        pm.collectionVariables.set('token', response.data.access_token);",
-									"        pm.collectionVariables.set('user_id', response.data.id);",
+									"        pm.environment.set('token', response.data.access_token);",
+									"        pm.environment.set('user_id', response.data.id);",
 									"        console.log('Token saved:', response.data.access_token);",
 									"        console.log('User ID saved:', response.data.id);",
 									"    }",
@@ -209,36 +209,8 @@
 						"description": "更新用户信息"
 					},
 					"response": []
-				},
-				{
-					"name": "用户登出",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{token}}"
-							},
-							{
-								"key": "UserID",
-								"value": "{{user_id}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/user/logout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"logout"
-							]
-						},
-						"description": "用户登出"
-					},
-					"response": []
 				}
+
 			],
 			"description": "用户管理相关接口"
 		},

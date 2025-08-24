@@ -48,3 +48,4 @@ services:
 networks:
   new-api-network:
     driver: bridge
+

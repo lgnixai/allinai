@@ -16,3 +16,4 @@ RUN mkdir -p /app/logs
 EXPOSE 8080
 
 CMD ["python", "webhook-server.py"]
+

@@ -3,200 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One-API 文档中心</title>
+    <title>API 文档中心</title>
+    <script>
+        // 重定向到新的文档页面
+        window.location.href = '/api/docs/docs.html';
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f8f9fa;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            background: #2c3e50;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 40px 0;
-            margin-bottom: 40px;
+        }
+        .loading {
             text-align: center;
         }
-        
-        .header h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-        
-        .header p {
-            font-size: 18px;
-            opacity: 0.9;
-        }
-        
-        .docs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .doc-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .doc-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-        }
-        
-        .doc-card h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-        
-        .doc-card p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-        
-        .doc-card .btn {
-            display: inline-block;
-            background: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s ease;
-        }
-        
-        .doc-card .btn:hover {
-            background: #2980b9;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 40px 0;
-            color: #666;
-            border-top: 1px solid #eee;
-        }
-        
-        .api-info {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .api-info h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        
-        .api-info .endpoint {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 10px 0;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 20px 0;
-            }
-            
-            .header h1 {
-                font-size: 28px;
-            }
-            
-            .docs-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>One-API 文档中心</h1>
-            <p>统一的AI接口管理平台 - 完整的API文档和使用指南</p>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="api-info">
-            <h2>📚 文档导航</h2>
-            <p>选择您需要的文档类型，快速了解One-API的使用方法：</p>
-        </div>
-        
-        <div class="docs-grid">
-            <a href="/api/docs/api" class="doc-card">
-                <h3>🚀 API 文档</h3>
-                <p>完整的API接口文档，包含所有端点的详细说明、请求参数、响应格式和示例代码。</p>
-                <span class="btn">查看文档</span>
-            </a>
-            
-            <a href="/api/docs/postman" class="doc-card">
-                <h3>📋 Postman 使用指南</h3>
-                <p>如何使用Postman测试API接口，包含环境配置、请求示例和最佳实践。</p>
-                <span class="btn">查看指南</span>
-            </a>
-            
-            <a href="/api/docs/deployment" class="doc-card">
-                <h3>⚙️ 部署指南</h3>
-                <p>详细的部署说明，包含Docker部署、手动部署和配置说明。</p>
-                <span class="btn">查看指南</span>
-            </a>
-            
-            <a href="/api/docs/auto-deployment" class="doc-card">
-                <h3>🤖 自动部署指南</h3>
-                <p>自动化部署流程，包含CI/CD配置和自动化脚本使用说明。</p>
-                <span class="btn">查看指南</span>
-            </a>
-            
-            <a href="/api/docs/auth" class="doc-card">
-                <h3>🔐 认证说明</h3>
-                <p>API认证机制详解，包含手机号登录、Token管理和权限控制。</p>
-                <span class="btn">查看说明</span>
-            </a>
-        </div>
-        
-        <div class="api-info">
-            <h2>🔗 快速访问</h2>
-            <p>您也可以通过以下API端点获取文档列表：</p>
-            <div class="endpoint">GET /api/docs/list</div>
-            <p>返回所有可用文档的JSON列表，方便程序化访问。</p>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <div class="container">
-            <p>&copy; 2024 One-API. 统一的AI接口管理平台</p>
-        </div>
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>正在跳转到文档中心...</p>
     </div>
 </body>
 </html>

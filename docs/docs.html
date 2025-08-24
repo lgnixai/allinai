@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 文档中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/marked@4.3.0/marked.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .prose {
+            max-width: none;
+        }
+        .prose h1 {
+            color: #1f2937;
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .prose h2 {
+            color: #374151;
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        .prose h3 {
+            color: #4b5563;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .prose p {
+            color: #6b7280;
+            line-height: 1.75;
+            margin-bottom: 1rem;
+        }
+        .prose code {
+            background-color: #f3f4f6;
+            color: #dc2626;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .prose pre {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .prose pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .prose blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #6b7280;
+            font-style: italic;
+        }
+        .prose ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        .prose ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        .prose li {
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .prose th {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+        }
+        .prose td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            color: #6b7280;
+        }
+        .prose a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .prose a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">文档中心</h1>
+                        <p class="text-sm text-gray-600">完整的 API 接口文档</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="搜索文档..."
+                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">文档目录</h2>
+                    <nav class="space-y-2" id="docNav">
+                        <button
+                            data-doc="api"
+                            class="doc-nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 bg-blue-50 text-blue-700 border border-blue-200"
+                        >
+                            <i data-lucide="code" class="w-5 h-5"></i>
+                            <div>
+                                <div class="font-medium">API 文档</div>
+                                <div class="text-sm text-blue-600">完整的 API 接口文档</div>
+                            </div>
+                        </button>
+
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <!-- Content Header -->
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="code" class="w-5 h-5 text-blue-600" id="docIcon"></i>
+                                <h1 class="text-xl font-semibold text-gray-900" id="docTitle">API 文档</h1>
+                            </div>
+                            <a
+                                href="#"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
+                                id="externalLink"
+                            >
+                                <span class="text-sm">在新窗口打开</span>
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                        <div id="loading" class="flex items-center justify-center py-12">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span class="ml-3 text-gray-600">加载中...</span>
+                        </div>
+                        <div id="content" class="prose prose-slate max-w-none hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化 Lucide 图标
+        lucide.createIcons();
+
+        // 文档配置
+        const docs = {
+            api: {
+                title: 'API 文档',
+                icon: 'code',
+                url: '/api/docs/api'
+            },
+            postman: {
+                title: 'Postman 指南',
+                icon: 'download',
+                url: '/api/docs/postman'
+            },
+            deployment: {
+                title: '部署指南',
+                icon: 'file-text',
+                url: '/api/docs/deployment'
+            },
+            auth: {
+                title: '认证信息',
+                icon: 'shield',
+                url: '/api/docs/auth'
+            }
+        };
+
+        let currentDoc = 'api';
+
+        // 加载文档内容
+        async function loadDoc(docId) {
+            const loadingEl = document.getElementById('loading');
+            const contentEl = document.getElementById('content');
+            const docTitleEl = document.getElementById('docTitle');
+            const docIconEl = document.getElementById('docIcon');
+            const externalLinkEl = document.getElementById('externalLink');
+
+            loadingEl.classList.remove('hidden');
+            contentEl.classList.add('hidden');
+
+            try {
+                const doc = docs[docId];
+                if (doc) {
+                    const response = await fetch(doc.url);
+                    const content = await response.text();
+                    
+                    // 更新标题和图标
+                    docTitleEl.textContent = doc.title;
+                    docIconEl.setAttribute('data-lucide', doc.icon);
+                    externalLinkEl.href = doc.url;
+                    
+                    // 渲染 Markdown
+                    contentEl.innerHTML = marked.parse(content, {
+                        breaks: true,
+                        gfm: true
+                    });
+                    
+                    // 重新初始化图标
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error('Failed to fetch document:', error);
+                contentEl.innerHTML = '<h1>文档加载失败</h1><p>请检查网络连接或稍后重试。</p>';
+            } finally {
+                loadingEl.classList.add('hidden');
+                contentEl.classList.remove('hidden');
+            }
+        }
+
+        // 切换文档
+        function switchDoc(docId) {
+            currentDoc = docId;
+            
+            // 更新导航按钮状态
+            document.querySelectorAll('.doc-nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
+                btn.classList.add('text-gray-700');
+                btn.querySelector('.text-sm').classList.remove('text-blue-600');
+                btn.querySelector('.text-sm').classList.add('text-gray-500');
+            });
+            
+            const activeBtn = document.querySelector(`[data-doc="${docId}"]`);
+            activeBtn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200');
+            activeBtn.classList.remove('text-gray-700');
+            activeBtn.querySelector('.text-sm').classList.add('text-blue-600');
+            activeBtn.querySelector('.text-sm').classList.remove('text-gray-500');
+            
+            // 加载文档内容
+            loadDoc(docId);
+        }
+
+        // 绑定事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定导航按钮点击事件
+            document.querySelectorAll('.doc-nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const docId = this.getAttribute('data-doc');
+                    switchDoc(docId);
+                });
+            });
+
+            // 绑定搜索功能
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                // 这里可以实现搜索功能
+                console.log('Searching for:', query);
+            });
+
+            // 加载初始文档
+            loadDoc('api');
+        });
+    </script>
+</body>
+</html>

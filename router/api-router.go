@@ -249,5 +249,8 @@ func SetApiRouter(router *gin.Engine) {
 			docsRoute.GET("/list", controller.GetDocsList) // 文档列表
 			docsRoute.GET("/:type", controller.GetDocs)    // 具体文档页面
 		}
+
+		// 新的文档页面路由
+		apiRouter.GET("/docs/docs.html", controller.GetDocsPage) // 新的文档页面
 	}
 }

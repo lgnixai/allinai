@@ -1,4 +1,4 @@
-# One-API 文档中心
+# API 文档中心
 
 ## 文档结构
 
@@ -18,7 +18,7 @@ postman/
 
 ### 1. 阅读API文档
 
-查看 [API_Documentation.md](./API_Documentation.md) 了解所有接口的详细信息。
+查看 [API_Documentation.md](html/API_Documentation.md) 了解所有接口的详细信息。
 
 ### 2. 使用Postman测试
 

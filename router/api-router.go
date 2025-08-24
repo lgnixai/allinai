@@ -215,20 +215,20 @@ func SetApiRouter(router *gin.Engine) {
 		subscriptionRoute := apiRouter.Group("/subscriptions")
 		subscriptionRoute.Use(middleware.UserAuth())
 		{
-			subscriptionRoute.GET("/", controller.GetUserSubscriptions)                    // 获取用户订阅列表
-			subscriptionRoute.POST("/", controller.CreateSubscription)                     // 创建订阅
-			       subscriptionRoute.PUT("/:id", controller.UpdateSubscription)                   // 更新订阅
-       subscriptionRoute.DELETE("/:id", controller.DeleteSubscription)                // 删除订阅
-       subscriptionRoute.GET("/:id/articles", controller.GetSubscriptionArticles)     // 获取订阅下的文章
-       subscriptionRoute.PUT("/:id/cancel", controller.CancelSubscription)             // 取消订阅
-       subscriptionRoute.PUT("/:id/reactivate", controller.ReactivateSubscription)     // 重新激活订阅
+			subscriptionRoute.GET("/", controller.GetUserSubscriptions)                 // 获取用户订阅列表
+			subscriptionRoute.POST("/", controller.CreateSubscription)                  // 创建订阅
+			subscriptionRoute.PUT("/:id", controller.UpdateSubscription)                // 更新订阅
+			subscriptionRoute.DELETE("/:id", controller.DeleteSubscription)             // 删除订阅
+			subscriptionRoute.GET("/:id/articles", controller.GetSubscriptionArticles)  // 获取订阅下的文章
+			subscriptionRoute.PUT("/:id/cancel", controller.CancelSubscription)         // 取消订阅
+			subscriptionRoute.PUT("/:id/reactivate", controller.ReactivateSubscription) // 重新激活订阅
 		}
 
 		// 订阅文章管理路由（管理员功能）
 		subscriptionArticleRoute := apiRouter.Group("/subscription_articles")
 		subscriptionArticleRoute.Use(middleware.AdminAuth())
 		{
-			subscriptionArticleRoute.POST("/", controller.CreateSubscriptionArticle)       // 创建订阅文章
+			subscriptionArticleRoute.POST("/", controller.CreateSubscriptionArticle) // 创建订阅文章
 		}
 
 		// 话题相关路由
@@ -240,6 +240,14 @@ func SetApiRouter(router *gin.Engine) {
 			topicRoute.DELETE("/:id", controller.DeleteTopic)            // 删除话题
 			topicRoute.GET("/:id/messages", controller.GetTopicMessages) // 获取话题下的消息
 			topicRoute.POST("/:id/messages", controller.CreateMessage)   // 发送消息
+		}
+
+		// API文档路由
+		docsRoute := apiRouter.Group("/docs")
+		{
+			docsRoute.GET("/", controller.GetDocsIndex)    // 文档首页
+			docsRoute.GET("/list", controller.GetDocsList) // 文档列表
+			docsRoute.GET("/:type", controller.GetDocs)    // 具体文档页面
 		}
 	}
 }

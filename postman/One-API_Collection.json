@@ -1,350 +1,703 @@
 {
-  "info": {
-    "name": "One-API Collection",
-    "description": "One-API 接口测试集合，包含用户管理、话题管理、订阅管理等功能",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://47.88.91.79:9999",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string"
-    }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "item": [
-    {
-      "name": "用户管理",
-      "item": [
-        {
-          "name": "用户登录",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/user/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "login"]
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    const response = pm.response.json();",
-                  "    if (response.success && response.data.token) {",
-                  "        pm.collectionVariables.set('token', response.data.token);",
-                  "    }",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "获取用户信息",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/user/info",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "info"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "用户注册",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"test_user\",\n  \"password\": \"password123\",\n  \"email\": \"test@example.com\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/user/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "register"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "更新用户信息",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"updated_username\",\n  \"display_name\": \"更新后的显示名称\",\n  \"school\": \"清华大学\",\n  \"college\": \"计算机学院\",\n  \"phone\": \"13800138000\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/user/self",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "self"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "话题管理",
-      "item": [
-        {
-          "name": "获取话题列表",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/topics?page=1&page_size=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "topics"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "page_size",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "创建话题",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"topic_name\": \"测试话题\",\n  \"model\": \"gpt-3.5-turbo\",\n  \"channel_id\": 1\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/topics",
-              "host": ["{{base_url}}"],
-              "path": ["api", "topics"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "获取话题消息",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/topics/1/messages?page=1&page_size=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "topics", "1", "messages"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "page_size",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "发送消息",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"content\": \"你好，这是一个测试消息\",\n  \"role\": \"user\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/topics/1/messages",
-              "host": ["{{base_url}}"],
-              "path": ["api", "topics", "1", "messages"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "删除话题",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/topics/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "topics", "1"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "订阅管理",
-      "item": [
-        {
-          "name": "获取订阅列表",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/subscriptions?page=1&page_size=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "subscriptions"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "page_size",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "创建订阅",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"topic_name\": \"技术新闻订阅\",\n  \"model\": \"gpt-3.5-turbo\",\n  \"channel_id\": 1\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/subscriptions",
-              "host": ["{{base_url}}"],
-              "path": ["api", "subscriptions"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "获取订阅文章",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/subscriptions/1/articles?page=1&page_size=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "subscriptions", "1", "articles"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "page_size",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "取消订阅",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/subscriptions/1/cancel",
-              "host": ["{{base_url}}"],
-              "path": ["api", "subscriptions", "1", "cancel"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "重新激活订阅",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/subscriptions/1/reactivate",
-              "host": ["{{base_url}}"],
-              "path": ["api", "subscriptions", "1", "reactivate"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "删除订阅",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/subscriptions/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "subscriptions", "1"]
-            }
-          },
-          "response": []
-        }
-      ]
-    }
-  ]
+	"info": {
+		"_postman_id": "one-api-collection",
+		"name": "One-API Collection",
+		"description": "One-API 接口测试集合",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "用户管理",
+			"item": [
+				{
+					"name": "发送手机验证码",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/phone_verification?phone={{phone}}&purpose=register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"phone_verification"
+							],
+							"query": [
+								{
+									"key": "phone",
+									"value": "{{phone}}"
+								},
+								{
+									"key": "purpose",
+									"value": "register"
+								}
+							]
+						},
+						"description": "发送手机验证码用于注册"
+					},
+					"response": []
+				},
+				{
+					"name": "用户注册",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"{{phone}}\",\n  \"phone_verification_code\": \"{{phone_verification_code}}\",\n  \"display_name\": \"测试用户\",\n  \"school\": \"测试大学\",\n  \"college\": \"计算机学院\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						},
+						"description": "用户注册"
+					},
+					"response": []
+				},
+				{
+					"name": "发送登录验证码",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/phone_verification?phone={{phone}}&purpose=login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"phone_verification"
+							],
+							"query": [
+								{
+									"key": "phone",
+									"value": "{{phone}}"
+								},
+								{
+									"key": "purpose",
+									"value": "login"
+								}
+							]
+						},
+						"description": "发送手机验证码用于登录"
+					},
+					"response": []
+				},
+				{
+					"name": "用户登录",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data) {",
+									"        pm.collectionVariables.set('token', response.data.access_token);",
+									"        pm.collectionVariables.set('user_id', response.data.id);",
+									"        console.log('Token saved:', response.data.access_token);",
+									"        console.log('User ID saved:', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"{{phone}}\",\n  \"phone_verification_code\": \"{{phone_verification_code}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						},
+						"description": "用户登录，获取access_token和user_id"
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户信息",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user/self",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"self"
+							]
+						},
+						"description": "获取当前用户信息"
+					},
+					"response": []
+				},
+				{
+					"name": "更新用户信息",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"display_name\": \"更新后的显示名称\",\n  \"school\": \"更新后的学校\",\n  \"college\": \"更新后的学院\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/self",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"self"
+							]
+						},
+						"description": "更新用户信息"
+					},
+					"response": []
+				},
+				{
+					"name": "用户登出",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/user/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"logout"
+							]
+						},
+						"description": "用户登出"
+					},
+					"response": []
+				}
+			],
+			"description": "用户管理相关接口"
+		},
+		{
+			"name": "话题管理",
+			"item": [
+				{
+					"name": "获取话题列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/topics/?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"topics",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "获取用户的话题列表"
+					},
+					"response": []
+				},
+				{
+					"name": "创建话题",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic_name\": \"测试话题\",\n  \"model\": \"gpt-3.5-turbo\",\n  \"channel_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/topics/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"topics",
+								""
+							]
+						},
+						"description": "创建新话题"
+					},
+					"response": []
+				},
+				{
+					"name": "删除话题",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/topics/{{topic_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"topics",
+								"{{topic_id}}"
+							]
+						},
+						"description": "删除指定话题"
+					},
+					"response": []
+				},
+				{
+					"name": "获取话题消息",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/topics/{{topic_id}}/messages?page=1&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"topics",
+								"{{topic_id}}",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						},
+						"description": "获取指定话题的聊天记录"
+					},
+					"response": []
+				},
+				{
+					"name": "发送消息",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"你好，这是一个测试消息\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/topics/{{topic_id}}/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"topics",
+								"{{topic_id}}",
+								"messages"
+							]
+						},
+						"description": "在指定话题中发送消息"
+					},
+					"response": []
+				}
+			],
+			"description": "话题管理相关接口"
+		},
+		{
+			"name": "订阅管理",
+			"item": [
+				{
+					"name": "获取订阅列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"subscriptions",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "获取用户的订阅列表"
+					},
+					"response": []
+				},
+				{
+					"name": "创建订阅",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic_name\": \"技术订阅\",\n  \"topic_description\": \"技术相关文章订阅\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"subscriptions",
+								""
+							]
+						},
+						"description": "创建新订阅"
+					},
+					"response": []
+				},
+				{
+					"name": "取消订阅",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/{{subscription_id}}/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"subscriptions",
+								"{{subscription_id}}",
+								"cancel"
+							]
+						},
+						"description": "取消指定订阅"
+					},
+					"response": []
+				},
+				{
+					"name": "重新激活订阅",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/{{subscription_id}}/reactivate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"subscriptions",
+								"{{subscription_id}}",
+								"reactivate"
+							]
+						},
+						"description": "重新激活已取消的订阅"
+					},
+					"response": []
+				},
+				{
+					"name": "删除订阅",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/{{subscription_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"subscriptions",
+								"{{subscription_id}}"
+							]
+						},
+						"description": "删除指定订阅"
+					},
+					"response": []
+				},
+				{
+					"name": "获取订阅文章",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/subscriptions/{{subscription_id}}/articles?page=1&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"subscriptions",
+								"{{subscription_id}}",
+								"articles"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "获取指定订阅的文章列表"
+					},
+					"response": []
+				}
+			],
+			"description": "订阅管理相关接口"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://47.88.91.79:9999",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "phone",
+			"value": "13800138000",
+			"type": "string"
+		},
+		{
+			"key": "phone_verification_code",
+			"value": "1111",
+			"type": "string"
+		},
+		{
+			"key": "topic_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "subscription_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
 }

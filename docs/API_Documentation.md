@@ -8,11 +8,18 @@ One-API 是一个统一的AI接口管理平台，提供用户管理、话题聊�
 
 ## 认证方式
 
-所有API请求都需要在Header中包含认证信息：
+所有需要认证的API请求都需要在Header中包含以下两个字段：
 
 ```
-Authorization: Bearer <your_token>
+Authorization: <your_access_token>
+UserID: <your_user_id>
 ```
+
+**注意**：
+- 必须同时提供 `Authorization` 和 `UserID` 两个请求头
+- `Authorization` 字段包含用户的访问令牌
+- `UserID` 字段包含用户的ID
+- 如果任一字段缺失或无效，将返回 `401 Unauthorized` 错误
 
 ## 通用响应格式
 
@@ -37,15 +44,60 @@ Authorization: Bearer <your_token>
 
 ## 1. 用户管理 API
 
-### 1.1 用户登录
+### 1.1 发送手机验证码
+
+**接口地址**: `GET /api/phone_verification`
+
+**请求参数**:
+- `phone`: 手机号（11位数字）
+- `purpose`: 用途（register-注册，login-登录）
+
+**请求示例**:
+```
+GET /api/phone_verification?phone=13800138000&purpose=register
+```
+
+**响应示例**:
+```json
+{
+  "success": true,
+  "message": "",
+  "data": "1111"
+}
+```
+
+### 1.2 用户注册
+
+**接口地址**: `POST /api/user/register`
+
+**请求参数**:
+```json
+{
+  "phone": "13800138000",
+  "phone_verification_code": "1111",
+  "display_name": "测试用户",
+  "school": "测试大学",
+  "college": "计算机学院"
+}
+```
+
+**响应示例**:
+```json
+{
+  "success": true,
+  "message": "注册成功"
+}
+```
+
+### 1.3 用户登录
 
 **接口地址**: `POST /api/user/login`
 
 **请求参数**:
 ```json
 {
-  "username": "your_username",
-  "password": "your_password"
+  "phone": "13800138000",
+  "phone_verification_code": "1111"
 }
 ```
 
@@ -55,23 +107,25 @@ Authorization: Bearer <your_token>
   "success": true,
   "message": "登录成功",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": 1,
-      "username": "admin",
-      "email": "admin@example.com",
-      "role": "admin",
-      "status": 1
-    }
+    "id": 1,
+    "username": "user_8000",
+    "display_name": "测试用户",
+    "role": 1,
+    "status": 1,
+    "group": "default",
+    "school": "测试大学",
+    "college": "计算机学院",
+    "phone": "13800138000",
+    "access_token": "your_access_token_here"
   }
 }
 ```
 
-### 1.2 获取用户信息
+### 1.4 获取用户信息
 
-**接口地址**: `GET /api/user/info`
+**接口地址**: `GET /api/user/self`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **响应示例**:
 ```json
@@ -79,55 +133,31 @@ Authorization: Bearer <your_token>
   "success": true,
   "data": {
     "id": 1,
-    "username": "admin",
-    "email": "admin@example.com",
-    "role": "admin",
+    "username": "user_8000",
+    "display_name": "测试用户",
+    "role": 1,
     "status": 1,
-    "created_at": "2024-01-01T00:00:00Z"
+    "group": "default",
+    "school": "测试大学",
+    "college": "计算机学院",
+    "phone": "13800138000",
+    "access_token": "your_access_token_here"
   }
 }
 ```
 
-### 1.3 用户注册
-
-**接口地址**: `POST /api/user/register`
-
-**请求参数**:
-```json
-{
-  "username": "new_user",
-  "password": "password123",
-  "email": "user@example.com"
-}
-```
-
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "注册成功",
-  "data": {
-    "id": 2,
-    "username": "new_user",
-    "email": "user@example.com"
-  }
-}
-```
-
-### 1.4 更新用户信息
+### 1.5 更新用户信息
 
 **接口地址**: `PUT /api/user/self`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **请求参数**:
 ```json
 {
-  "username": "updated_username",
-  "display_name": "显示名称",
-  "school": "学校名称",
-  "college": "学院名称",
-  "phone": "手机号码"
+  "display_name": "更新后的显示名称",
+  "school": "更新后的学校",
+  "college": "更新后的学院"
 }
 ```
 
@@ -135,26 +165,35 @@ Authorization: Bearer <your_token>
 ```json
 {
   "success": true,
-  "message": "用户信息更新成功"
+  "message": "更新成功"
 }
 ```
 
-**注意事项**:
-- 只能更新自己的用户信息
-- 用户名不能重复
-- 手机号码需要符合格式要求
+### 1.6 用户登出
+
+**接口地址**: `GET /api/user/logout`
+
+**请求头**: 需要认证token和UserID
+
+**响应示例**:
+```json
+{
+  "success": true,
+  "message": "登出成功"
+}
+```
 
 ## 2. 话题管理 API
 
 ### 2.1 获取话题列表
 
-**接口地址**: `GET /api/topics`
+**接口地址**: `GET /api/topics/`
+
+**请求头**: 需要认证token和UserID
 
 **请求参数**:
 - `page`: 页码（默认1）
-- `page_size`: 每页数量（默认10）
-
-**请求头**: 需要认证token
+- `size`: 每页数量（默认10）
 
 **响应示例**:
 ```json
@@ -164,31 +203,30 @@ Authorization: Bearer <your_token>
     "topics": [
       {
         "id": 1,
-        "user_id": 1,
-        "topic_name": "技术讨论",
+        "topic_name": "测试话题",
         "model": "gpt-3.5-turbo",
         "channel_id": 1,
         "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-01T00:00:00Z",
-        "status": 1,
         "message_count": 5
       }
     ],
-    "total": 1
+    "total": 1,
+    "page": 1,
+    "size": 10
   }
 }
 ```
 
 ### 2.2 创建话题
 
-**接口地址**: `POST /api/topics`
+**接口地址**: `POST /api/topics/`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **请求参数**:
 ```json
 {
-  "topic_name": "新话题",
+  "topic_name": "测试话题",
   "model": "gpt-3.5-turbo",
   "channel_id": 1
 }
@@ -200,14 +238,11 @@ Authorization: Bearer <your_token>
   "success": true,
   "message": "话题创建成功",
   "data": {
-    "id": 2,
-    "user_id": 1,
-    "topic_name": "新话题",
+    "id": 1,
+    "topic_name": "测试话题",
     "model": "gpt-3.5-turbo",
     "channel_id": 1,
-    "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z",
-    "status": 1
+    "created_at": "2024-01-01T00:00:00Z"
   }
 }
 ```
@@ -216,7 +251,7 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `DELETE /api/topics/{id}`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **响应示例**:
 ```json
@@ -230,11 +265,11 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `GET /api/topics/{id}/messages`
 
+**请求头**: 需要认证token和UserID
+
 **请求参数**:
 - `page`: 页码（默认1）
-- `page_size`: 每页数量（默认10）
-
-**请求头**: 需要认证token
+- `size`: 每页数量（默认20）
 
 **响应示例**:
 ```json
@@ -244,24 +279,20 @@ Authorization: Bearer <your_token>
     "messages": [
       {
         "id": 1,
-        "topic_id": 1,
         "role": "user",
         "content": "你好",
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-01T00:00:00Z",
-        "status": 1
+        "created_at": "2024-01-01T00:00:00Z"
       },
       {
         "id": 2,
-        "topic_id": 1,
         "role": "assistant",
-        "content": "\"技术讨论\": 你好！有什么可以帮助您的吗？",
-        "created_at": "2024-01-01T00:00:01Z",
-        "updated_at": "2024-01-01T00:00:01Z",
-        "status": 1
+        "content": "\"测试话题\": 你好！我是AI助手，有什么可以帮助你的吗？",
+        "created_at": "2024-01-01T00:01:00Z"
       }
     ],
-    "total": 2
+    "total": 2,
+    "page": 1,
+    "size": 20
   }
 }
 ```
@@ -270,13 +301,12 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `POST /api/topics/{id}/messages`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **请求参数**:
 ```json
 {
-  "content": "用户消息内容",
-  "role": "user"
+  "content": "你好，这是一个测试消息"
 }
 ```
 
@@ -288,17 +318,15 @@ Authorization: Bearer <your_token>
   "data": {
     "user_message": {
       "id": 3,
-      "topic_id": 1,
       "role": "user",
-      "content": "用户消息内容",
-      "created_at": "2024-01-01T00:00:00Z"
+      "content": "你好，这是一个测试消息",
+      "created_at": "2024-01-01T00:02:00Z"
     },
     "ai_message": {
       "id": 4,
-      "topic_id": 1,
       "role": "assistant",
-      "content": "\"技术讨论\": 这是一个很好的问题！让我来为您详细解答。",
-      "created_at": "2024-01-01T00:00:01Z"
+      "content": "\"测试话题\": 你好！我收到了你的测试消息，有什么可以帮助你的吗？",
+      "created_at": "2024-01-01T00:02:01Z"
     }
   }
 }
@@ -308,13 +336,13 @@ Authorization: Bearer <your_token>
 
 ### 3.1 获取订阅列表
 
-**接口地址**: `GET /api/subscriptions`
+**接口地址**: `GET /api/subscriptions/`
+
+**请求头**: 需要认证token和UserID
 
 **请求参数**:
 - `page`: 页码（默认1）
-- `page_size`: 每页数量（默认10）
-
-**请求头**: 需要认证token
+- `size`: 每页数量（默认10）
 
 **响应示例**:
 ```json
@@ -324,31 +352,30 @@ Authorization: Bearer <your_token>
     "subscriptions": [
       {
         "id": 1,
-        "user_id": 1,
-        "topic_name": "技术新闻",
+        "topic_name": "技术订阅",
+        "topic_description": "技术相关文章订阅",
         "status": 1,
-        "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": "2024-01-01T00:00:00Z",
-        "article_count": 10
+        "created_at": "2024-01-01T00:00:00Z"
       }
     ],
-    "total": 1
+    "total": 1,
+    "page": 1,
+    "size": 10
   }
 }
 ```
 
 ### 3.2 创建订阅
 
-**接口地址**: `POST /api/subscriptions`
+**接口地址**: `POST /api/subscriptions/`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **请求参数**:
 ```json
 {
-  "topic_name": "新订阅主题",
-  "model": "gpt-3.5-turbo",
-  "channel_id": 1
+  "topic_name": "技术订阅",
+  "topic_description": "技术相关文章订阅"
 }
 ```
 
@@ -358,14 +385,11 @@ Authorization: Bearer <your_token>
   "success": true,
   "message": "订阅创建成功",
   "data": {
-    "id": 2,
-    "user_id": 1,
-    "topic_name": "新订阅主题",
-    "model": "gpt-3.5-turbo",
-    "channel_id": 1,
-    "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z",
-    "status": 1
+    "id": 1,
+    "topic_name": "技术订阅",
+    "topic_description": "技术相关文章订阅",
+    "status": 1,
+    "created_at": "2024-01-01T00:00:00Z"
   }
 }
 ```
@@ -374,7 +398,7 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `PUT /api/subscriptions/{id}/cancel`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **响应示例**:
 ```json
@@ -388,13 +412,13 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `PUT /api/subscriptions/{id}/reactivate`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **响应示例**:
 ```json
 {
   "success": true,
-  "message": "订阅重新激活成功"
+  "message": "订阅已重新激活"
 }
 ```
 
@@ -402,7 +426,7 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `DELETE /api/subscriptions/{id}`
 
-**请求头**: 需要认证token
+**请求头**: 需要认证token和UserID
 
 **响应示例**:
 ```json
@@ -416,11 +440,11 @@ Authorization: Bearer <your_token>
 
 **接口地址**: `GET /api/subscriptions/{id}/articles`
 
+**请求头**: 需要认证token和UserID
+
 **请求参数**:
 - `page`: 页码（默认1）
-- `page_size`: 每页数量（默认10）
-
-**请求头**: 需要认证token
+- `size`: 每页数量（默认10）
 
 **响应示例**:
 ```json
@@ -430,35 +454,56 @@ Authorization: Bearer <your_token>
     "articles": [
       {
         "id": 1,
-        "subscription_id": 1,
-        "title": "文章标题",
-        "content": "文章内容",
-        "url": "https://example.com/article",
+        "title": "示例文章标题",
+        "content": "文章内容...",
+        "author": "作者",
         "published_at": "2024-01-01T00:00:00Z",
-        "created_at": "2024-01-01T00:00:00Z",
-        "status": 1
+        "article_url": "https://example.com/article"
       }
     ],
-    "total": 1
+    "total": 1,
+    "page": 1,
+    "size": 10
   }
 }
 ```
 
 ## 错误码说明
 
-| 状态码 | 说明 |
+| 错误码 | 说明 |
 |--------|------|
-| 200 | 请求成功 |
 | 400 | 请求参数错误 |
-| 401 | 未认证或token无效 |
+| 401 | 未授权，认证失败 |
 | 403 | 权限不足 |
 | 404 | 资源不存在 |
 | 500 | 服务器内部错误 |
 
-## 注意事项
+## 常见错误信息
 
-1. 所有需要认证的接口都必须在请求头中包含有效的token
-2. 分页参数page从1开始计数
-3. 时间格式统一使用ISO 8601格式
-4. 删除操作通常为软删除，不会真正删除数据
-5. 话题和订阅的状态：1表示正常，0表示已删除/取消
+- `"手机号格式错误"`: 手机号必须是11位数字
+- `"手机验证码错误或已过期"`: 验证码不正确或已过期
+- `"手机号未注册"`: 登录时使用的手机号未注册
+- `"手机号已被占用"`: 注册时使用的手机号已存在
+- `"无权进行此操作，access token 无效"`: 访问令牌无效
+- `"无权进行此操作，与登录用户不匹配"`: UserID与访问令牌不匹配
+- `"无权进行此操作，未提供 UserID"`: 缺少UserID请求头
+- `"用户已被封禁"`: 用户账户被禁用
+
+## 使用说明
+
+1. **注册流程**：
+   - 先调用发送验证码接口获取验证码
+   - 使用验证码进行注册
+
+2. **登录流程**：
+   - 先调用发送验证码接口获取验证码
+   - 使用验证码进行登录
+   - 保存返回的access_token和user_id
+
+3. **API调用**：
+   - 在请求头中添加Authorization和UserID
+   - 使用保存的access_token和user_id
+
+4. **测试数据**：
+   - 测试环境验证码固定为"1111"
+   - 可以使用任意11位手机号进行测试

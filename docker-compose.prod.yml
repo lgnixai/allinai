@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  new-api:
+    build: .
+    container_name: new-api
+    restart: always
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./one-api.db:/app/one-api.db
+    environment:
+      - SQL_DSN=local
+      - PORT=4000
+      - SESSION_SECRET=${SESSION_SECRET}
+      - REDIS_CONN_STRING=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - new-api-network
+
+  webhook-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.webhook
+    container_name: webhook-server
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./scripts:/app/scripts
+      - ./logs:/app/logs
+    environment:
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - PROJECT_DIR=/app
+    networks:
+      - new-api-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    networks:
+      - new-api-network
+
+networks:
+  new-api-network:
+    driver: bridge

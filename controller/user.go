@@ -550,25 +550,59 @@ func UpdateSelf(c *gin.Context) {
 		})
 		return
 	}
-	if err := common.Validate.Struct(&user); err != nil {
+
+	// 获取当前用户信息
+	currentUser, err := model.GetUserById(c.GetInt("id"), false)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+
+	// 只更新用户提供的字段
+	updates := make(map[string]interface{})
+
+	if user.Username != "" {
+		updates["username"] = user.Username
+	}
+	if user.DisplayName != "" {
+		updates["display_name"] = user.DisplayName
+	}
+	if user.School != "" {
+		updates["school"] = user.School
+	}
+	if user.College != "" {
+		updates["college"] = user.College
+	}
+	if user.Phone != "" {
+		// 如果提供了手机号，需要验证格式
+		if len(user.Phone) != 11 {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "手机号必须是11位数字",
+			})
+			return
+		}
+		updates["phone"] = user.Phone
+	}
+
+	// 如果没有提供任何要更新的字段
+	if len(updates) == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "输入不合法 " + err.Error(),
+			"message": "请提供要更新的字段",
 		})
 		return
 	}
 
-	cleanUser := model.User{
-		Id:          c.GetInt("id"),
-		Username:    user.Username,
-		DisplayName: user.DisplayName,
-		School:      user.School,
-		College:     user.College,
-		Phone:       user.Phone,
-	}
-	if err := cleanUser.Update(false); err != nil {
+	// 更新用户信息
+	if err := model.DB.Model(&currentUser).Updates(updates).Error; err != nil {
 		common.ApiError(c, err)
 		return
+	}
+
+	// 清除缓存，下次获取时会重新加载
+	if err := model.InvalidateUserCache(currentUser.Id); err != nil {
+		common.SysError("failed to invalidate user cache: " + err.Error())
 	}
 
 	c.JSON(http.StatusOK, gin.H{

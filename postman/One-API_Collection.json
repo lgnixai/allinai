@@ -701,13 +701,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/user/articles?page=1&page_size=10",
+							"raw": "{{base_url}}/api/subscriptions/articles?page=1&page_size=10",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"user",
+								"subscriptions",
 								"articles"
 							],
 							"query": [

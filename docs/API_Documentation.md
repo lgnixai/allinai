@@ -494,7 +494,7 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 
 ### 3.7 获取所有订阅文章
 
-**接口地址**: `GET /api/user/articles`
+**接口地址**: `GET /api/subscriptions/articles`
 
 **请求头**: 需要认证token和UserID
 

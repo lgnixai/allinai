@@ -222,6 +222,7 @@ func SetApiRouter(router *gin.Engine) {
 			subscriptionRoute.GET("/:id/articles", controller.GetSubscriptionArticles)  // 获取订阅下的文章
 			subscriptionRoute.PUT("/:id/cancel", controller.CancelSubscription)         // 取消订阅
 			subscriptionRoute.PUT("/:id/reactivate", controller.ReactivateSubscription) // 重新激活订阅
+			subscriptionRoute.GET("/articles", controller.GetAllSubscriptionArticles)   // 获取当前用户订阅的所有文章
 		}
 
 		// 订阅文章管理路由（管理员功能）
@@ -230,9 +231,6 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			subscriptionArticleRoute.POST("/", controller.CreateSubscriptionArticle) // 创建订阅文章
 		}
-
-		// 用户订阅文章路由（需要认证）
-		apiRouter.GET("/user/articles", middleware.UserAuth(), controller.GetAllSubscriptionArticles) // 获取当前用户订阅的所有文章
 
 		// 系统推荐路由（用户相关，需要认证）
 		apiRouter.GET("/user/recommendations", middleware.UserAuth(), controller.GetSystemRecommendations)            // 获取系统推荐列表

@@ -136,7 +136,7 @@ func UpdateSubscription(c *gin.Context) {
 	}
 
 	// 检查权限
-	if subscription.UserID != userID {
+	if subscription.CreateUserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "无权限修改此订阅",
@@ -243,7 +243,7 @@ func DeleteSubscription(c *gin.Context) {
 		return
 	}
 
-	if subscription.UserID != userID {
+	if subscription.CreateUserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "无权限删除此订阅",

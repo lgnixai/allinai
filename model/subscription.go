@@ -7,7 +7,7 @@ import (
 // Subscription 用户订阅表
 type Subscription struct {
 	ID               int       `json:"id" gorm:"primaryKey"`
-	UserID           int       `json:"user_id" gorm:"not null"`
+	CreateUserID     int       `json:"create_user_id" gorm:"column:create_user_id;not null"`
 	TopicName        string    `json:"topic_name" gorm:"not null;size:100"`
 	TopicDescription string    `json:"topic_description" gorm:"type:text"`
 	CreatedAt        time.Time `json:"created_at" gorm:"autoCreateTime"`
@@ -15,7 +15,7 @@ type Subscription struct {
 	Status           int       `json:"status" gorm:"default:1"` // 1: 活跃, 0: 取消
 
 	// 关联字段
-	User         User                  `json:"user" gorm:"foreignKey:UserID"`
+	User         User                  `json:"user" gorm:"foreignKey:CreateUserID"`
 	Articles     []SubscriptionArticle `json:"articles" gorm:"foreignKey:SubscriptionID"`
 	ArticleCount int                   `json:"article_count" gorm:"-"`
 }
@@ -53,7 +53,7 @@ func GetUserSubscriptions(userID int, page, pageSize int) ([]Subscription, int64
 	var total int64
 
 	// 获取总数（包括已取消的订阅）
-	err := DB.Model(&Subscription{}).Where("user_id = ? AND status = 1", userID).Count(&total).Error
+	err := DB.Model(&Subscription{}).Where("create_user_id = ? AND status = 1", userID).Count(&total).Error
 	if err != nil {
 		return nil, 0, err
 	}
@@ -61,7 +61,7 @@ func GetUserSubscriptions(userID int, page, pageSize int) ([]Subscription, int64
 	// 获取分页数据（包括已取消的订阅）
 	offset := (page - 1) * pageSize
 	err = DB.Preload("Articles", "status = 1").
-		Where("user_id = ? AND status = 1", userID).
+		Where("create_user_id = ? AND status = 1", userID).
 		Order("created_at DESC").
 		Offset(offset).
 		Limit(pageSize).
@@ -110,7 +110,7 @@ func DeleteSubscription(id int) error {
 // CancelSubscription 取消订阅
 func CancelSubscription(id, userID int) error {
 	return DB.Model(&Subscription{}).
-		Where("id = ? AND user_id = ?", id, userID).
+		Where("id = ? AND create_user_id = ?", id, userID).
 		Update("status", 0).Error
 }
 
@@ -118,7 +118,7 @@ func CancelSubscription(id, userID int) error {
 func CheckSubscriptionExists(userID int, topicName string) (bool, error) {
 	var count int64
 	err := DB.Model(&Subscription{}).
-		Where("user_id = ? AND topic_name = ? AND status = 1", userID, topicName).
+		Where("create_user_id = ? AND topic_name = ? AND status = 1", userID, topicName).
 		Count(&count).Error
 	return count > 0, err
 }
@@ -126,7 +126,7 @@ func CheckSubscriptionExists(userID int, topicName string) (bool, error) {
 // ReactivateSubscription 重新激活已取消的订阅
 func ReactivateSubscription(userID int, topicName string) error {
 	return DB.Model(&Subscription{}).
-		Where("user_id = ? AND topic_name = ? AND status = 0", userID, topicName).
+		Where("create_user_id = ? AND topic_name = ? AND status = 0", userID, topicName).
 		Update("status", 1).Error
 }
 
@@ -216,12 +216,12 @@ func GetAllSubscriptionArticlesWithSubscription(page, pageSize int) ([]Subscript
 
 // UserSubscription 用户订阅关系表
 type UserSubscription struct {
-	ID           int       `json:"id" gorm:"primaryKey"`
-	UserID       int       `json:"user_id" gorm:"not null"`
-	SubscriptionID int     `json:"subscription_id" gorm:"not null"`
-	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt    time.Time `json:"updated_at" gorm:"autoUpdateTime"`
-	Status       int       `json:"status" gorm:"default:1"` // 1: 活跃, 0: 取消
+	ID             int       `json:"id" gorm:"primaryKey"`
+	UserID         int       `json:"user_id" gorm:"column:user_id;not null"`
+	SubscriptionID int       `json:"subscription_id" gorm:"column:subscription_id;not null"`
+	CreatedAt      time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Status         int       `json:"status" gorm:"default:1"` // 1: 活跃, 0: 取消
 
 	// 关联字段
 	User         User         `json:"user" gorm:"foreignKey:UserID"`
@@ -344,7 +344,7 @@ func CreateSubscriptionWithUserRelation(userID int, topicName, topicDescription 
 
 	// 创建新的订阅
 	subscription := &Subscription{
-		UserID:           0, // 订阅本身不关联特定用户
+		CreateUserID:     0, // 订阅本身不关联特定用户
 		TopicName:        topicName,
 		TopicDescription: topicDescription,
 		Status:           1,

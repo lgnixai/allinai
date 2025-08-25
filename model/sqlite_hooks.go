@@ -82,13 +82,23 @@ func CreateTablesWithForeignKeys() error {
 		)`,
 		`CREATE TABLE subscriptions (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id INTEGER NOT NULL,
+			create_user_id INTEGER NOT NULL,
 			topic_name VARCHAR(100) NOT NULL,
 			topic_description TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			status INTEGER DEFAULT 1,
-			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+			FOREIGN KEY (create_user_id) REFERENCES users(id) ON DELETE CASCADE
+		)`,
+		`CREATE TABLE user_subscriptions (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			subscription_id INTEGER NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			status INTEGER DEFAULT 1,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
 		)`,
 		`CREATE TABLE subscription_articles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,13 +136,16 @@ func CreateTablesWithForeignKeys() error {
 		`CREATE INDEX idx_messages_topic_id ON messages(topic_id)`,
 		`CREATE INDEX idx_messages_status ON messages(status)`,
 		`CREATE INDEX idx_messages_created_at ON messages(created_at)`,
-		`CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id)`,
+		`CREATE INDEX idx_subscriptions_create_user_id ON subscriptions(create_user_id)`,
 		`CREATE INDEX idx_subscriptions_topic_name ON subscriptions(topic_name)`,
 		`CREATE INDEX idx_subscriptions_status ON subscriptions(status)`,
 		`CREATE INDEX idx_subscription_articles_subscription_id ON subscription_articles(subscription_id)`,
 		`CREATE INDEX idx_subscription_articles_published_at ON subscription_articles(published_at)`,
 		`CREATE INDEX idx_subscription_articles_status ON subscription_articles(status)`,
-		`CREATE UNIQUE INDEX idx_subscriptions_user_topic ON subscriptions(user_id, topic_name)`,
+		`CREATE UNIQUE INDEX idx_subscriptions_create_user_topic ON subscriptions(create_user_id, topic_name)`,
+		`CREATE INDEX idx_user_subscriptions_user_id ON user_subscriptions(user_id)`,
+		`CREATE INDEX idx_user_subscriptions_subscription_id ON user_subscriptions(subscription_id)`,
+		`CREATE UNIQUE INDEX idx_user_subscriptions_user_subscription ON user_subscriptions(user_id, subscription_id)`,
 		`CREATE INDEX idx_system_recommendations_category ON system_recommendations(category)`,
 		`CREATE INDEX idx_system_recommendations_status ON system_recommendations(status)`,
 		`CREATE INDEX idx_system_recommendations_sort_order ON system_recommendations(sort_order)`,
@@ -178,7 +191,7 @@ func CheckAndFixForeignKeys() error {
 	}{
 		{"topics", `SELECT COUNT(*) FROM pragma_foreign_key_list('topics') WHERE "table"='users' AND "from"='user_id'`},
 		{"messages", `SELECT COUNT(*) FROM pragma_foreign_key_list('messages') WHERE "table"='topics' AND "from"='topic_id'`},
-		{"subscriptions", `SELECT COUNT(*) FROM pragma_foreign_key_list('subscriptions') WHERE "table"='users' AND "from"='user_id'`},
+		{"subscriptions", `SELECT COUNT(*) FROM pragma_foreign_key_list('subscriptions') WHERE "table"='users' AND "from"='create_user_id'`},
 		{"subscription_articles", `SELECT COUNT(*) FROM pragma_foreign_key_list('subscription_articles') WHERE "table"='subscriptions' AND "from"='subscription_id'`},
 	}
 

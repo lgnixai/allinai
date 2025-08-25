@@ -272,6 +272,7 @@ func migrateDB() error {
 		&QuotaData{},
 		&Task{},
 		&Setup{},
+		// UserSubscription 由 SQLite 钩子处理
 		&Subscription{},
 		&SubscriptionArticle{},
 		&Topic{},
@@ -302,6 +303,7 @@ func migrateDBFast() error {
 		{&QuotaData{}, "QuotaData"},
 		{&Task{}, "Task"},
 		{&Setup{}, "Setup"},
+		// UserSubscription 由 SQLite 钩子处理
 		// 跳过有外键约束的模型，由SQLite钩子处理
 		// {&Subscription{}, "Subscription"},
 		// {&SubscriptionArticle{}, "SubscriptionArticle"},

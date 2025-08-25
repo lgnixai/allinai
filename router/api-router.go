@@ -234,6 +234,19 @@ func SetApiRouter(router *gin.Engine) {
 		// 用户订阅文章路由（需要认证）
 		apiRouter.GET("/articles", middleware.UserAuth(), controller.GetAllSubscriptionArticles) // 获取当前用户订阅的所有文章
 
+		// 系统推荐路由
+		apiRouter.GET("/recommendations", controller.GetSystemRecommendations)                    // 获取系统推荐列表（公开接口）
+		apiRouter.GET("/recommendations/:id", controller.GetSystemRecommendationByID)             // 获取单个系统推荐（公开接口）
+
+		// 系统推荐管理路由（管理员功能）
+		recommendationRoute := apiRouter.Group("/recommendations")
+		recommendationRoute.Use(middleware.AdminAuth())
+		{
+			recommendationRoute.POST("/", controller.CreateSystemRecommendation)    // 创建系统推荐
+			recommendationRoute.PUT("/:id", controller.UpdateSystemRecommendation)  // 更新系统推荐
+			recommendationRoute.DELETE("/:id", controller.DeleteSystemRecommendation) // 删除系统推荐
+		}
+
 		// 话题相关路由
 		topicRoute := apiRouter.Group("/topics")
 		topicRoute.Use(middleware.UserAuth())

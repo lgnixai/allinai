@@ -212,6 +212,11 @@ func InitDB() (err error) {
 		if err := CheckAndFixForeignKeys(); err != nil {
 			common.SysLog("warning: failed to check/fix foreign keys: " + err.Error())
 		}
+
+		// 初始化系统推荐数据
+		if err := InitializeSystemRecommendations(); err != nil {
+			common.SysLog("warning: failed to initialize system recommendations: " + err.Error())
+		}
 		return err
 	} else {
 		common.FatalLog(err)

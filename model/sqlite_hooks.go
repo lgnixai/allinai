@@ -104,6 +104,18 @@ func CreateTablesWithForeignKeys() error {
 			status INTEGER DEFAULT 1,
 			FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
 		)`,
+		`CREATE TABLE system_recommendations (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			title VARCHAR(255) NOT NULL,
+			description TEXT,
+			category VARCHAR(100),
+			subscription_count INTEGER DEFAULT 0,
+			article_count INTEGER DEFAULT 0,
+			status INTEGER DEFAULT 1,
+			sort_order INTEGER DEFAULT 0,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	// 创建索引
@@ -121,6 +133,9 @@ func CreateTablesWithForeignKeys() error {
 		`CREATE INDEX idx_subscription_articles_published_at ON subscription_articles(published_at)`,
 		`CREATE INDEX idx_subscription_articles_status ON subscription_articles(status)`,
 		`CREATE UNIQUE INDEX idx_subscriptions_user_topic ON subscriptions(user_id, topic_name)`,
+		`CREATE INDEX idx_system_recommendations_category ON system_recommendations(category)`,
+		`CREATE INDEX idx_system_recommendations_status ON system_recommendations(status)`,
+		`CREATE INDEX idx_system_recommendations_sort_order ON system_recommendations(sort_order)`,
 	}
 
 	// 执行创建表的SQL

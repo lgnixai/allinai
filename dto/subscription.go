@@ -37,6 +37,7 @@ type SubscriptionListResponse struct {
 type CreateSubscriptionArticleRequest struct {
 	SubscriptionID int       `json:"subscription_id" binding:"required"`
 	Title          string    `json:"title" binding:"required,max=255"`
+	Summary        string    `json:"summary" binding:"max=1000"` // 文章概要
 	Content        string    `json:"content" binding:"max=10000"`
 	Author         string    `json:"author" binding:"max=100"`
 	PublishedAt    time.Time `json:"published_at"`
@@ -48,6 +49,7 @@ type SubscriptionArticleResponse struct {
 	ID             int        `json:"id"`
 	SubscriptionID int        `json:"subscription_id"`
 	Title          string     `json:"title"`
+	Summary        string     `json:"summary"` // 文章概要
 	Content        string     `json:"content"`
 	Author         string     `json:"author"`
 	PublishedAt    *time.Time `json:"published_at"`

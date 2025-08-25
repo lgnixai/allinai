@@ -94,6 +94,7 @@ func CreateTablesWithForeignKeys() error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			subscription_id INTEGER NOT NULL,
 			title VARCHAR(255) NOT NULL,
+			summary TEXT,
 			content TEXT,
 			author VARCHAR(100),
 			published_at DATETIME,

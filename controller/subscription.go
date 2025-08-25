@@ -391,6 +391,7 @@ func GetSubscriptionArticles(c *gin.Context) {
 			ID:             article.ID,
 			SubscriptionID: article.SubscriptionID,
 			Title:          article.Title,
+			Summary:        article.Summary,
 			Content:        article.Content,
 			Author:         article.Author,
 			PublishedAt:    article.PublishedAt,
@@ -407,8 +408,18 @@ func GetSubscriptionArticles(c *gin.Context) {
 	})
 }
 
-// GetAllSubscriptionArticles 获取所有订阅文章
+// GetAllSubscriptionArticles 获取当前用户订阅的所有文章
 func GetAllSubscriptionArticles(c *gin.Context) {
+	// 获取当前用户ID
+	userID := c.GetInt("user_id")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "用户未登录",
+		})
+		return
+	}
+	
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
@@ -420,8 +431,8 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 		pageSize = 10
 	}
 	
-	// 获取文章列表
-	articles, total, err := model.GetAllSubscriptionArticles(page, pageSize)
+	// 获取当前用户的订阅文章列表
+	articles, total, err := model.GetUserSubscriptionArticles(userID, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -441,6 +452,7 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 			ID:             article.ID,
 			SubscriptionID: article.SubscriptionID,
 			Title:          article.Title,
+			Summary:        article.Summary,
 			Content:        article.Content,
 			Author:         article.Author,
 			PublishedAt:    article.PublishedAt,
@@ -501,6 +513,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 	article := &model.SubscriptionArticle{
 		SubscriptionID: req.SubscriptionID,
 		Title:          req.Title,
+		Summary:        req.Summary,
 		Content:        req.Content,
 		Author:         req.Author,
 		PublishedAt:    &req.PublishedAt,

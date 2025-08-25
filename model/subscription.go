@@ -25,6 +25,7 @@ type SubscriptionArticle struct {
 	ID             int        `json:"id" gorm:"primaryKey"`
 	SubscriptionID int        `json:"subscription_id" gorm:"not null"`
 	Title          string     `json:"title" gorm:"not null;size:255"`
+	Summary        string     `json:"summary" gorm:"type:text"` // 文章概要
 	Content        string     `json:"content" gorm:"type:text"`
 	Author         string     `json:"author" gorm:"size:100"`
 	PublishedAt    *time.Time `json:"published_at"`
@@ -205,6 +206,32 @@ func GetAllSubscriptionArticlesWithSubscription(page, pageSize int) ([]Subscript
 	offset := (page - 1) * pageSize
 	err = DB.Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
 		Where("subscription_articles.status = 1 AND subscriptions.status = 1").
+		Order("subscription_articles.published_at DESC, subscription_articles.created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&articles).Error
+
+	return articles, total, nil
+}
+
+// GetUserSubscriptionArticles 获取当前用户订阅的所有文章
+func GetUserSubscriptionArticles(userID int, page, pageSize int) ([]SubscriptionArticle, int64, error) {
+	var articles []SubscriptionArticle
+	var total int64
+
+	// 获取总数
+	err := DB.Model(&SubscriptionArticle{}).
+		Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
+		Where("subscription_articles.status = 1 AND subscriptions.status = 1 AND subscriptions.user_id = ?", userID).
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	offset := (page - 1) * pageSize
+	err = DB.Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
+		Where("subscription_articles.status = 1 AND subscriptions.status = 1 AND subscriptions.user_id = ?", userID).
 		Order("subscription_articles.published_at DESC, subscription_articles.created_at DESC").
 		Offset(offset).
 		Limit(pageSize).

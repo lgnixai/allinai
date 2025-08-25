@@ -231,8 +231,8 @@ func SetApiRouter(router *gin.Engine) {
 			subscriptionArticleRoute.POST("/", controller.CreateSubscriptionArticle) // 创建订阅文章
 		}
 
-		// 所有订阅文章路由（公开接口，无需认证）
-		apiRouter.GET("/articles", controller.GetAllSubscriptionArticles) // 获取所有订阅文章
+		// 用户订阅文章路由（需要认证）
+		apiRouter.GET("/articles", middleware.UserAuth(), controller.GetAllSubscriptionArticles) // 获取当前用户订阅的所有文章
 
 		// 话题相关路由
 		topicRoute := apiRouter.Group("/topics")

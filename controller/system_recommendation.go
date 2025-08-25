@@ -104,7 +104,7 @@ func GetSystemRecommendationByID(c *gin.Context) {
 // CreateSystemRecommendation 创建系统推荐（管理员功能）
 func CreateSystemRecommendation(c *gin.Context) {
 	// 检查管理员权限
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	user, err := model.GetUserById(userID, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -133,13 +133,13 @@ func CreateSystemRecommendation(c *gin.Context) {
 
 	// 创建推荐
 	recommendation := &model.SystemRecommendation{
-		Title:           req.Title,
-		Description:     req.Description,
-		Category:        req.Category,
+		Title:             req.Title,
+		Description:       req.Description,
+		Category:          req.Category,
 		SubscriptionCount: 0,
-		ArticleCount:    0,
-		Status:          1,
-		SortOrder:       req.SortOrder,
+		ArticleCount:      0,
+		Status:            1,
+		SortOrder:         req.SortOrder,
 	}
 
 	err = model.CreateSystemRecommendation(recommendation)
@@ -163,7 +163,7 @@ func CreateSystemRecommendation(c *gin.Context) {
 // UpdateSystemRecommendation 更新系统推荐（管理员功能）
 func UpdateSystemRecommendation(c *gin.Context) {
 	// 检查管理员权限
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	user, err := model.GetUserById(userID, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -244,7 +244,7 @@ func UpdateSystemRecommendation(c *gin.Context) {
 // DeleteSystemRecommendation 删除系统推荐（管理员功能）
 func DeleteSystemRecommendation(c *gin.Context) {
 	// 检查管理员权限
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	user, err := model.GetUserById(userID, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -288,9 +288,18 @@ func DeleteSystemRecommendation(c *gin.Context) {
 
 // SearchSystemRecommendations 搜索系统推荐
 func SearchSystemRecommendations(c *gin.Context) {
-	// 获取搜索关键字
-	keyword := c.Query("keyword")
-	if keyword == "" {
+	// 解析请求体
+	var req dto.SearchSystemRecommendationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "请求参数错误: " + err.Error(),
+		})
+		return
+	}
+
+	// 验证搜索关键字
+	if req.Keyword == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": "搜索关键字不能为空",
@@ -298,19 +307,16 @@ func SearchSystemRecommendations(c *gin.Context) {
 		return
 	}
 
-	// 获取分页参数
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-
-	if page < 1 {
-		page = 1
+	// 设置默认分页参数
+	if req.Page < 1 {
+		req.Page = 1
 	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
+	if req.PageSize < 1 || req.PageSize > 100 {
+		req.PageSize = 10
 	}
 
 	// 搜索推荐列表
-	recommendations, total, err := model.SearchSystemRecommendations(keyword, page, pageSize)
+	recommendations, total, err := model.SearchSystemRecommendations(req.Keyword, req.Page, req.PageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -322,8 +328,8 @@ func SearchSystemRecommendations(c *gin.Context) {
 	// 转换为响应格式
 	var response dto.SystemRecommendationListResponse
 	response.Total = total
-	response.Page = page
-	response.PageSize = pageSize
+	response.Page = req.Page
+	response.PageSize = req.PageSize
 
 	for _, rec := range recommendations {
 		response.Recommendations = append(response.Recommendations, dto.SystemRecommendationResponse{
@@ -343,14 +349,14 @@ func SearchSystemRecommendations(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    response,
-		"keyword": keyword,
+		"keyword": req.Keyword,
 	})
 }
 
 // GetWelcomePage 获取欢迎页面（首次访问）
 func GetWelcomePage(c *gin.Context) {
 	// 获取当前用户信息
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	var displayName string
 	if userID > 0 {
 		user, err := model.GetUserById(userID, false)
@@ -358,7 +364,7 @@ func GetWelcomePage(c *gin.Context) {
 			displayName = user.DisplayName
 		}
 	}
-	
+
 	// 如果获取不到用户信息，使用默认称呼
 	if displayName == "" {
 		displayName = "朋友"

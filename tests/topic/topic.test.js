@@ -151,6 +151,51 @@ describe('话题管理模块测试', () => {
         apiClient.sendMessage(99999, '测试消息')
       ).rejects.toThrow();
     });
+
+    test('当话题ID为0时应该自动创建话题', async () => {
+      const messageContent = '这是一个自动创建话题的测试消息，内容比较长';
+      const result = await apiClient.sendMessage(0, messageContent);
+      
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('成功');
+      expect(result.data).toBeDefined();
+      expect(result.data.user_message).toBeDefined();
+      expect(result.data.ai_message).toBeDefined();
+      expect(result.data.topic).toBeDefined();
+      expect(result.data.user_message.content).toBe(messageContent);
+      
+      // 验证话题标题是内容的前10个字符
+      expect(result.data.topic.topic_name).toBe('这是一个自动创建话题的测试消息，内容比较长'.substring(0, 10));
+      expect(result.data.topic.user_id).toBe(global.testData.user.id);
+      expect(result.data.topic.model).toBe('gpt-3.5-turbo');
+      expect(result.data.topic.channel_id).toBe(1);
+      
+      // 保存新创建的话题ID用于清理
+      const newTopicId = result.data.topic.id;
+      
+      // 清理新创建的话题
+      try {
+        await apiClient.deleteTopic(newTopicId);
+      } catch (error) {
+        console.log('清理自动创建的话题时出错:', error.message);
+      }
+    });
+
+    test('当话题ID为0时应该正确处理短内容', async () => {
+      const shortMessage = '短消息';
+      const result = await apiClient.sendMessage(0, shortMessage);
+      
+      expect(result.success).toBe(true);
+      expect(result.data.topic).toBeDefined();
+      expect(result.data.topic.topic_name).toBe(shortMessage);
+      
+      // 清理新创建的话题
+      try {
+        await apiClient.deleteTopic(result.data.topic.id);
+      } catch (error) {
+        console.log('清理自动创建的话题时出错:', error.message);
+      }
+    });
   });
 
   describe('获取话题消息', () => {

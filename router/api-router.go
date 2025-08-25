@@ -232,14 +232,14 @@ func SetApiRouter(router *gin.Engine) {
 		}
 
 		// 用户订阅文章路由（需要认证）
-		apiRouter.GET("/articles", middleware.UserAuth(), controller.GetAllSubscriptionArticles) // 获取当前用户订阅的所有文章
+		apiRouter.GET("/user/articles", middleware.UserAuth(), controller.GetAllSubscriptionArticles) // 获取当前用户订阅的所有文章
 
-		// 系统推荐路由
-		apiRouter.GET("/recommendations", controller.GetSystemRecommendations)           // 获取系统推荐列表（公开接口）
-		apiRouter.GET("/recommendations/search", controller.SearchSystemRecommendations) // 搜索系统推荐（公开接口）
-		apiRouter.GET("/recommendations/:id", controller.GetSystemRecommendationByID)    // 获取单个系统推荐（公开接口）
-		apiRouter.GET("/welcome", middleware.UserAuth(), controller.GetWelcomePage)     // 获取欢迎页面（首次访问，需要认证）
-		apiRouter.GET("/recommendations/change", controller.GetRecommendationPage)       // 获取推荐页面（后续访问）
+		// 系统推荐路由（用户相关，需要认证）
+		apiRouter.GET("/user/recommendations", middleware.UserAuth(), controller.GetSystemRecommendations)            // 获取系统推荐列表
+		apiRouter.POST("/user/recommendations/search", middleware.UserAuth(), controller.SearchSystemRecommendations) // 搜索系统推荐
+		apiRouter.GET("/user/recommendations/:id", middleware.UserAuth(), controller.GetSystemRecommendationByID)     // 获取单个系统推荐
+		apiRouter.GET("/user/welcome", middleware.UserAuth(), controller.GetWelcomePage)                              // 获取欢迎页面（首次访问）
+		apiRouter.GET("/user/recommendations/change", middleware.UserAuth(), controller.GetRecommendationPage)        // 获取推荐页面（后续访问）
 
 		// 系统推荐管理路由（管理员功能）
 		recommendationRoute := apiRouter.Group("/recommendations")

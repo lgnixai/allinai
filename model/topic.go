@@ -32,9 +32,6 @@ type Message struct {
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 	Status    int       `json:"status" gorm:"default:1"` // 1: 正常, 0: 删除
-
-	// 关联字段
-	Topic Topic `json:"topic" gorm:"foreignKey:TopicID"`
 }
 
 // TableName 指定表名

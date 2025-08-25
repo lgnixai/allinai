@@ -10,6 +10,7 @@ type CreateSubscriptionRequest struct {
 
 // UpdateSubscriptionRequest 更新订阅请求
 type UpdateSubscriptionRequest struct {
+	TopicName        string `json:"topic_name" binding:"max=100"`
 	TopicDescription string `json:"topic_description" binding:"max=1000"`
 }
 

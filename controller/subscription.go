@@ -16,7 +16,7 @@ import (
 
 // GetUserSubscriptions 获取用户的订阅列表
 func GetUserSubscriptions(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -66,7 +66,7 @@ func GetUserSubscriptions(c *gin.Context) {
 
 // CreateSubscription 创建订阅
 func CreateSubscription(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 
 	var req dto.CreateSubscriptionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -157,7 +157,7 @@ func CreateSubscription(c *gin.Context) {
 
 // UpdateSubscription 更新订阅
 func UpdateSubscription(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	subscriptionID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -196,7 +196,12 @@ func UpdateSubscription(c *gin.Context) {
 	}
 
 	// 更新订阅
-	subscription.TopicDescription = req.TopicDescription
+	if req.TopicName != "" {
+		subscription.TopicName = req.TopicName
+	}
+	if req.TopicDescription != "" {
+		subscription.TopicDescription = req.TopicDescription
+	}
 	err = model.UpdateSubscription(subscription)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -214,7 +219,7 @@ func UpdateSubscription(c *gin.Context) {
 
 // CancelSubscription 取消订阅
 func CancelSubscription(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	subscriptionID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -241,7 +246,7 @@ func CancelSubscription(c *gin.Context) {
 
 // ReactivateSubscription 重新激活订阅
 func ReactivateSubscription(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	subscriptionID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -287,7 +292,7 @@ func ReactivateSubscription(c *gin.Context) {
 
 // DeleteSubscription 删除订阅
 func DeleteSubscription(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	subscriptionID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -332,7 +337,7 @@ func DeleteSubscription(c *gin.Context) {
 
 // GetSubscriptionArticles 获取订阅下的文章
 func GetSubscriptionArticles(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	subscriptionID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -412,7 +417,7 @@ func GetSubscriptionArticles(c *gin.Context) {
 // GetAllSubscriptionArticles 获取当前用户订阅的所有文章
 func GetAllSubscriptionArticles(c *gin.Context) {
 	// 获取当前用户ID
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -473,7 +478,7 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 // CreateSubscriptionArticle 创建订阅文章（管理员功能）
 func CreateSubscriptionArticle(c *gin.Context) {
 	// 检查管理员权限
-	userID := c.GetInt("user_id")
+	userID := c.GetInt("id")
 	user, err := model.GetUserById(userID, false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

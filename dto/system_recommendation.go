@@ -51,3 +51,10 @@ type WelcomePageResponse struct {
 type RecommendationPageResponse struct {
 	Recommendations []SystemRecommendationResponse `json:"recommendations"`
 }
+
+// SearchSystemRecommendationRequest 搜索系统推荐请求
+type SearchSystemRecommendationRequest struct {
+	Keyword  string `json:"keyword" binding:"required"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"page_size"`
+}

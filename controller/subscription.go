@@ -7,27 +7,28 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"one-api/common"
 	"one-api/dto"
 	"one-api/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetUserSubscriptions 获取用户的订阅列表
 func GetUserSubscriptions(c *gin.Context) {
 	userID := c.GetInt("user_id")
-	
+
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	
+
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 10
 	}
-	
+
 	// 获取订阅列表
 	subscriptions, total, err := model.GetUserSubscriptions(userID, page, pageSize)
 	if err != nil {
@@ -37,13 +38,13 @@ func GetUserSubscriptions(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 转换为响应格式
 	var response dto.SubscriptionListResponse
 	response.Total = total
 	response.Page = page
 	response.PageSize = pageSize
-	
+
 	for _, sub := range subscriptions {
 		response.Subscriptions = append(response.Subscriptions, dto.SubscriptionResponse{
 			ID:               sub.ID,
@@ -56,7 +57,7 @@ func GetUserSubscriptions(c *gin.Context) {
 			ArticleCount:     sub.ArticleCount,
 		})
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    response,
@@ -66,7 +67,7 @@ func GetUserSubscriptions(c *gin.Context) {
 // CreateSubscription 创建订阅
 func CreateSubscription(c *gin.Context) {
 	userID := c.GetInt("user_id")
-	
+
 	var req dto.CreateSubscriptionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -75,7 +76,7 @@ func CreateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 检查是否已订阅该主题
 	exists, err := model.CheckSubscriptionExists(userID, req.TopicName)
 	if err != nil {
@@ -85,7 +86,7 @@ func CreateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if exists {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -108,7 +109,7 @@ func CreateSubscription(c *gin.Context) {
 					common.SysError("生成模拟文章失败: " + err.Error())
 				}
 			}()
-			
+
 			c.JSON(http.StatusOK, gin.H{
 				"success": true,
 				"message": "订阅重新激活成功",
@@ -119,7 +120,7 @@ func CreateSubscription(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	// 创建订阅
 	subscription := &model.Subscription{
 		UserID:           userID,
@@ -127,7 +128,7 @@ func CreateSubscription(c *gin.Context) {
 		TopicDescription: req.TopicDescription,
 		Status:           1,
 	}
-	
+
 	err = model.CreateSubscription(subscription)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -144,7 +145,7 @@ func CreateSubscription(c *gin.Context) {
 			common.SysError("生成模拟文章失败: " + err.Error())
 		}
 	}()
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "订阅创建成功",
@@ -165,7 +166,7 @@ func UpdateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	var req dto.UpdateSubscriptionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -174,7 +175,7 @@ func UpdateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 获取订阅
 	subscription, err := model.GetSubscriptionByID(subscriptionID)
 	if err != nil {
@@ -184,7 +185,7 @@ func UpdateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 检查权限
 	if subscription.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -193,7 +194,7 @@ func UpdateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 更新订阅
 	subscription.TopicDescription = req.TopicDescription
 	err = model.UpdateSubscription(subscription)
@@ -204,7 +205,7 @@ func UpdateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "订阅更新成功",
@@ -222,7 +223,7 @@ func CancelSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	err = model.CancelSubscription(subscriptionID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -231,7 +232,7 @@ func CancelSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "订阅已取消",
@@ -249,7 +250,7 @@ func ReactivateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 检查权限
 	subscription, err := model.GetSubscriptionByID(subscriptionID)
 	if err != nil {
@@ -259,7 +260,7 @@ func ReactivateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if subscription.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -267,7 +268,7 @@ func ReactivateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 重新激活订阅
 	err = model.ReactivateSubscription(userID, subscription.TopicName)
 	if err != nil {
@@ -277,7 +278,7 @@ func ReactivateSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "订阅重新激活成功",
@@ -295,7 +296,7 @@ func DeleteSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 检查权限
 	subscription, err := model.GetSubscriptionByID(subscriptionID)
 	if err != nil {
@@ -305,7 +306,7 @@ func DeleteSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if subscription.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -313,7 +314,7 @@ func DeleteSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	err = model.DeleteSubscription(subscriptionID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -322,7 +323,7 @@ func DeleteSubscription(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "订阅已删除",
@@ -340,7 +341,7 @@ func GetSubscriptionArticles(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 检查权限
 	subscription, err := model.GetSubscriptionByID(subscriptionID)
 	if err != nil {
@@ -350,7 +351,7 @@ func GetSubscriptionArticles(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if subscription.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -358,18 +359,18 @@ func GetSubscriptionArticles(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	
+
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 10
 	}
-	
+
 	// 获取文章列表
 	articles, total, err := model.GetSubscriptionArticles(subscriptionID, page, pageSize)
 	if err != nil {
@@ -379,13 +380,13 @@ func GetSubscriptionArticles(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 转换为响应格式
 	var response dto.SubscriptionArticleListResponse
 	response.Total = total
 	response.Page = page
 	response.PageSize = pageSize
-	
+
 	for _, article := range articles {
 		response.Articles = append(response.Articles, dto.SubscriptionArticleResponse{
 			ID:             article.ID,
@@ -401,7 +402,7 @@ func GetSubscriptionArticles(c *gin.Context) {
 			Status:         article.Status,
 		})
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    response,
@@ -419,18 +420,18 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	
+
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 10
 	}
-	
+
 	// 获取当前用户的订阅文章列表
 	articles, total, err := model.GetUserSubscriptionArticles(userID, page, pageSize)
 	if err != nil {
@@ -440,13 +441,13 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 转换为响应格式
 	var response dto.SubscriptionArticleListResponse
 	response.Total = total
 	response.Page = page
 	response.PageSize = pageSize
-	
+
 	for _, article := range articles {
 		response.Articles = append(response.Articles, dto.SubscriptionArticleResponse{
 			ID:             article.ID,
@@ -462,7 +463,7 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 			Status:         article.Status,
 		})
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    response,
@@ -481,7 +482,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if user.Role < common.RoleAdminUser {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -489,7 +490,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	var req dto.CreateSubscriptionArticleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -498,7 +499,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 检查订阅是否存在
 	_, err = model.GetSubscriptionByID(req.SubscriptionID)
 	if err != nil {
@@ -508,7 +509,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 创建文章
 	article := &model.SubscriptionArticle{
 		SubscriptionID: req.SubscriptionID,
@@ -520,7 +521,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		ArticleURL:     req.ArticleURL,
 		Status:         1,
 	}
-	
+
 	err = model.CreateSubscriptionArticle(article)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -529,7 +530,7 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "文章创建成功",

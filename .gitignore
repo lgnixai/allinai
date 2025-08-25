@@ -8,6 +8,7 @@ build
 logs
 app.log
 one-api
+main
 .DS_Store
 tiktoken_cachetmp/
 tmp/

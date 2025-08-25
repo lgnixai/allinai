@@ -214,15 +214,50 @@ func GetAllSubscriptionArticlesWithSubscription(page, pageSize int) ([]Subscript
 	return articles, total, nil
 }
 
-// GetUserSubscriptionArticles 获取当前用户订阅的所有文章
-func GetUserSubscriptionArticles(userID int, page, pageSize int) ([]SubscriptionArticle, int64, error) {
-	var articles []SubscriptionArticle
+// UserSubscription 用户订阅关系表
+type UserSubscription struct {
+	ID           int       `json:"id" gorm:"primaryKey"`
+	UserID       int       `json:"user_id" gorm:"not null"`
+	SubscriptionID int     `json:"subscription_id" gorm:"not null"`
+	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt    time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Status       int       `json:"status" gorm:"default:1"` // 1: 活跃, 0: 取消
+
+	// 关联字段
+	User         User         `json:"user" gorm:"foreignKey:UserID"`
+	Subscription Subscription `json:"subscription" gorm:"foreignKey:SubscriptionID"`
+}
+
+// TableName 指定表名
+func (UserSubscription) TableName() string {
+	return "user_subscriptions"
+}
+
+// CreateUserSubscription 创建用户订阅关系
+func CreateUserSubscription(userSubscription *UserSubscription) error {
+	return DB.Create(userSubscription).Error
+}
+
+// GetUserSubscriptionByUserAndSubscription 根据用户ID和订阅ID获取关系
+func GetUserSubscriptionByUserAndSubscription(userID, subscriptionID int) (*UserSubscription, error) {
+	var userSubscription UserSubscription
+	err := DB.Where("user_id = ? AND subscription_id = ? AND status = 1", userID, subscriptionID).
+		First(&userSubscription).Error
+	if err != nil {
+		return nil, err
+	}
+	return &userSubscription, nil
+}
+
+// GetUserSubscriptionsByUserID 获取用户的所有订阅关系
+func GetUserSubscriptionsByUserID(userID int, page, pageSize int) ([]UserSubscription, int64, error) {
+	var userSubscriptions []UserSubscription
 	var total int64
 
 	// 获取总数
-	err := DB.Model(&SubscriptionArticle{}).
-		Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
-		Where("subscription_articles.status = 1 AND subscriptions.status = 1 AND subscriptions.user_id = ?", userID).
+	err := DB.Model(&UserSubscription{}).
+		Joins("JOIN subscriptions ON user_subscriptions.subscription_id = subscriptions.id").
+		Where("user_subscriptions.user_id = ? AND user_subscriptions.status = 1 AND subscriptions.status = 1", userID).
 		Count(&total).Error
 	if err != nil {
 		return nil, 0, err
@@ -230,8 +265,133 @@ func GetUserSubscriptionArticles(userID int, page, pageSize int) ([]Subscription
 
 	// 获取分页数据
 	offset := (page - 1) * pageSize
-	err = DB.Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
-		Where("subscription_articles.status = 1 AND subscriptions.status = 1 AND subscriptions.user_id = ?", userID).
+	err = DB.Preload("Subscription").
+		Joins("JOIN subscriptions ON user_subscriptions.subscription_id = subscriptions.id").
+		Where("user_subscriptions.user_id = ? AND user_subscriptions.status = 1 AND subscriptions.status = 1", userID).
+		Order("user_subscriptions.created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&userSubscriptions).Error
+
+	return userSubscriptions, total, nil
+}
+
+// CancelUserSubscription 取消用户订阅关系
+func CancelUserSubscription(userID, subscriptionID int) error {
+	return DB.Model(&UserSubscription{}).
+		Where("user_id = ? AND subscription_id = ?", userID, subscriptionID).
+		Update("status", 0).Error
+}
+
+// ReactivateUserSubscription 重新激活用户订阅关系
+func ReactivateUserSubscription(userID, subscriptionID int) error {
+	return DB.Model(&UserSubscription{}).
+		Where("user_id = ? AND subscription_id = ? AND status = 0", userID, subscriptionID).
+		Update("status", 1).Error
+}
+
+// GetSubscriptionByTopicName 根据主题名称获取订阅
+func GetSubscriptionByTopicName(topicName string) (*Subscription, error) {
+	var subscription Subscription
+	err := DB.Where("topic_name = ? AND status = 1", topicName).
+		First(&subscription).Error
+	if err != nil {
+		return nil, err
+	}
+	return &subscription, nil
+}
+
+// CreateSubscriptionWithUserRelation 创建订阅并建立用户关系
+func CreateSubscriptionWithUserRelation(userID int, topicName, topicDescription string) (*Subscription, error) {
+	// 开启事务
+	tx := DB.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// 检查是否已存在相同主题的订阅
+	existingSubscription, err := GetSubscriptionByTopicName(topicName)
+	if err == nil {
+		// 订阅已存在，检查用户是否已有关系
+		_, err := GetUserSubscriptionByUserAndSubscription(userID, existingSubscription.ID)
+		if err == nil {
+			// 关系已存在，回滚事务
+			tx.Rollback()
+			return existingSubscription, nil
+		}
+
+		// 创建用户订阅关系
+		userSubscription := &UserSubscription{
+			UserID:         userID,
+			SubscriptionID: existingSubscription.ID,
+			Status:         1,
+		}
+		err = tx.Create(userSubscription).Error
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		// 提交事务
+		tx.Commit()
+		return existingSubscription, nil
+	}
+
+	// 创建新的订阅
+	subscription := &Subscription{
+		UserID:           0, // 订阅本身不关联特定用户
+		TopicName:        topicName,
+		TopicDescription: topicDescription,
+		Status:           1,
+	}
+	err = tx.Create(subscription).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// 创建用户订阅关系
+	userSubscription := &UserSubscription{
+		UserID:         userID,
+		SubscriptionID: subscription.ID,
+		Status:         1,
+	}
+	err = tx.Create(userSubscription).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// 提交事务
+	tx.Commit()
+	return subscription, nil
+}
+
+// GetUserSubscriptionArticles 获取当前用户订阅的所有文章（使用新的关系表）
+func GetUserSubscriptionArticles(userID int, page, pageSize int) ([]SubscriptionArticle, int64, error) {
+	var articles []SubscriptionArticle
+	var total int64
+
+	// 获取总数
+	err := DB.Model(&SubscriptionArticle{}).
+		Joins("JOIN user_subscriptions ON subscription_articles.subscription_id = user_subscriptions.subscription_id").
+		Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
+		Where("subscription_articles.status = 1 AND user_subscriptions.status = 1 AND subscriptions.status = 1 AND user_subscriptions.user_id = ?", userID).
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	offset := (page - 1) * pageSize
+	err = DB.Joins("JOIN user_subscriptions ON subscription_articles.subscription_id = user_subscriptions.subscription_id").
+		Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
+		Where("subscription_articles.status = 1 AND user_subscriptions.status = 1 AND subscriptions.status = 1 AND user_subscriptions.user_id = ?", userID).
 		Order("subscription_articles.published_at DESC, subscription_articles.created_at DESC").
 		Offset(offset).
 		Limit(pageSize).

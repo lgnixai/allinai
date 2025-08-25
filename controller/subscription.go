@@ -29,8 +29,8 @@ func GetUserSubscriptions(c *gin.Context) {
 		pageSize = 10
 	}
 
-	// 获取订阅列表
-	subscriptions, total, err := model.GetUserSubscriptions(userID, page, pageSize)
+	// 获取用户订阅关系列表
+	userSubscriptions, total, err := model.GetUserSubscriptionsByUserID(userID, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -45,16 +45,16 @@ func GetUserSubscriptions(c *gin.Context) {
 	response.Page = page
 	response.PageSize = pageSize
 
-	for _, sub := range subscriptions {
+	for _, userSub := range userSubscriptions {
 		response.Subscriptions = append(response.Subscriptions, dto.SubscriptionResponse{
-			ID:               sub.ID,
-			UserID:           sub.UserID,
-			TopicName:        sub.TopicName,
-			TopicDescription: sub.TopicDescription,
-			CreatedAt:        sub.CreatedAt,
-			UpdatedAt:        sub.UpdatedAt,
-			Status:           sub.Status,
-			ArticleCount:     sub.ArticleCount,
+			ID:               userSub.Subscription.ID,
+			UserID:           userSub.UserID,
+			TopicName:        userSub.Subscription.TopicName,
+			TopicDescription: userSub.Subscription.TopicDescription,
+			CreatedAt:        userSub.CreatedAt,
+			UpdatedAt:        userSub.UpdatedAt,
+			Status:           userSub.Status,
+			ArticleCount:     userSub.Subscription.ArticleCount,
 		})
 	}
 
@@ -77,59 +77,8 @@ func CreateSubscription(c *gin.Context) {
 		return
 	}
 
-	// 检查是否已订阅该主题
-	exists, err := model.CheckSubscriptionExists(userID, req.TopicName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "检查订阅状态失败: " + err.Error(),
-		})
-		return
-	}
-
-	if exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "您已经订阅了该主题",
-		})
-		return
-	}
-
-	// 检查是否有已取消的订阅，如果有则重新激活
-	err = model.ReactivateSubscription(userID, req.TopicName)
-	if err == nil {
-		// 重新激活成功，获取订阅ID
-		var existingSub model.Subscription
-		err = model.DB.Where("user_id = ? AND topic_name = ?", userID, req.TopicName).First(&existingSub).Error
-		if err == nil {
-			// 生成模拟文章数据
-			go func() {
-				err := generateMockArticles(existingSub.ID, req.TopicName)
-				if err != nil {
-					common.SysError("生成模拟文章失败: " + err.Error())
-				}
-			}()
-
-			c.JSON(http.StatusOK, gin.H{
-				"success": true,
-				"message": "订阅重新激活成功",
-				"data": gin.H{
-					"id": existingSub.ID,
-				},
-			})
-			return
-		}
-	}
-
-	// 创建订阅
-	subscription := &model.Subscription{
-		UserID:           userID,
-		TopicName:        req.TopicName,
-		TopicDescription: req.TopicDescription,
-		Status:           1,
-	}
-
-	err = model.CreateSubscription(subscription)
+	// 使用新的创建订阅逻辑
+	subscription, err := model.CreateSubscriptionWithUserRelation(userID, req.TopicName, req.TopicDescription)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -229,7 +178,7 @@ func CancelSubscription(c *gin.Context) {
 		return
 	}
 
-	err = model.CancelSubscription(subscriptionID, userID)
+	err = model.CancelUserSubscription(userID, subscriptionID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -256,26 +205,8 @@ func ReactivateSubscription(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
-	subscription, err := model.GetSubscriptionByID(subscriptionID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "订阅不存在",
-		})
-		return
-	}
-
-	if subscription.UserID != userID {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "无权限操作此订阅",
-		})
-		return
-	}
-
-	// 重新激活订阅
-	err = model.ReactivateSubscription(userID, subscription.TopicName)
+	// 重新激活用户订阅关系
+	err = model.ReactivateUserSubscription(userID, subscriptionID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -347,17 +278,9 @@ func GetSubscriptionArticles(c *gin.Context) {
 		return
 	}
 
-	// 检查权限和订阅状态
-	subscription, err := model.GetSubscriptionByID(subscriptionID)
+	// 检查用户是否有权限查看此订阅的文章
+	userSubscription, err := model.GetUserSubscriptionByUserAndSubscription(userID, subscriptionID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "订阅不存在",
-		})
-		return
-	}
-
-	if subscription.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "无权限查看此订阅的文章",
@@ -365,10 +288,8 @@ func GetSubscriptionArticles(c *gin.Context) {
 		return
 	}
 
-
-
-	// 检查订阅是否被取消
-	if subscription.Status == 0 {
+	// 检查用户订阅关系是否被取消
+	if userSubscription.Status == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "订阅已取消，无法查看文章",

@@ -4,6 +4,7 @@ upload
 *.exe
 *.db
 build
+test-build
 *.db-journal
 logs
 app.log

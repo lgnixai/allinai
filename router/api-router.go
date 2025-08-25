@@ -217,11 +217,11 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			subscriptionRoute.GET("/", controller.GetUserSubscriptions)                 // 获取用户订阅列表
 			subscriptionRoute.POST("/", controller.CreateSubscription)                  // 创建订阅
-			subscriptionRoute.PUT("/:id", controller.UpdateSubscription)                // 更新订阅
-			subscriptionRoute.DELETE("/:id", controller.DeleteSubscription)             // 删除订阅
 			subscriptionRoute.GET("/:id/articles", controller.GetSubscriptionArticles)  // 获取订阅下的文章
 			subscriptionRoute.PUT("/:id/cancel", controller.CancelSubscription)         // 取消订阅
 			subscriptionRoute.PUT("/:id/reactivate", controller.ReactivateSubscription) // 重新激活订阅
+			subscriptionRoute.PUT("/:id", controller.UpdateSubscription)                // 更新订阅
+			subscriptionRoute.DELETE("/:id", controller.DeleteSubscription)             // 删除订阅
 			subscriptionRoute.GET("/articles", controller.GetAllSubscriptionArticles)   // 获取当前用户订阅的所有文章
 		}
 
@@ -252,12 +252,13 @@ func SetApiRouter(router *gin.Engine) {
 		topicRoute := apiRouter.Group("/topics")
 		topicRoute.Use(middleware.UserAuth())
 		{
-			topicRoute.GET("/", controller.GetTopics)                    // 获取话题列表
-			topicRoute.POST("/", controller.CreateTopic)                 // 创建话题
+			topicRoute.GET("/", controller.GetTopics) // 获取话题列表
+			topicRoute.POST("/", controller.CreateTopic)
 			topicRoute.PUT("/:id", controller.UpdateTopicName)           // 更新话题名称
-			topicRoute.DELETE("/:id", controller.DeleteTopic)            // 删除话题
+			topicRoute.DELETE("/:id", controller.DeleteTopic)            // 创建话题
 			topicRoute.GET("/:id/messages", controller.GetTopicMessages) // 获取话题下的消息
 			topicRoute.POST("/:id/messages", controller.CreateMessage)   // 发送消息
+			// 删除话题
 		}
 
 		// API文档路由

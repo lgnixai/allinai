@@ -40,8 +40,10 @@ func GetTopics(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data": gin.H{
-			"topics": simplifiedTopics,
-			"total":  total,
+			"topics":    simplifiedTopics,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
 		},
 	})
 }
@@ -233,9 +235,11 @@ func GetTopicMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data": gin.H{
-			"messages": messages,
-			"total":    total,
-			"topic_id": topicID,
+			"messages":  messages,
+			"page":      page,
+			"page_size": pageSize,
+			"total":     total,
+			"topic_id":  topicID,
 		},
 	})
 }

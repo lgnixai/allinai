@@ -249,6 +249,17 @@ func GetUserSubscriptionByUserAndSubscription(userID, subscriptionID int) (*User
 	return &userSubscription, nil
 }
 
+// GetUserSubscriptionByUserAndSubscriptionAnyStatus 根据用户ID和订阅ID获取关系（任何状态）
+func GetUserSubscriptionByUserAndSubscriptionAnyStatus(userID, subscriptionID int) (*UserSubscription, error) {
+	var userSubscription UserSubscription
+	err := DB.Where("user_id = ? AND subscription_id = ?", userID, subscriptionID).
+		First(&userSubscription).Error
+	if err != nil {
+		return nil, err
+	}
+	return &userSubscription, nil
+}
+
 // GetUserSubscriptionsByUserID 获取用户的所有订阅关系
 func GetUserSubscriptionsByUserID(userID int, page, pageSize int) ([]UserSubscription, int64, error) {
 	var userSubscriptions []UserSubscription
@@ -318,11 +329,26 @@ func CreateSubscriptionWithUserRelation(userID int, topicName, topicDescription 
 	existingSubscription, err := GetSubscriptionByTopicName(topicName)
 	if err == nil {
 		// 订阅已存在，检查用户是否已有关系
-		_, err := GetUserSubscriptionByUserAndSubscription(userID, existingSubscription.ID)
+		existingUserSubscription, err := GetUserSubscriptionByUserAndSubscriptionAnyStatus(userID, existingSubscription.ID)
 		if err == nil {
-			// 关系已存在，回滚事务
-			tx.Rollback()
-			return existingSubscription, nil
+			// 关系已存在，检查状态
+			if existingUserSubscription.Status == 1 {
+				// 已经是活跃状态，回滚事务
+				tx.Rollback()
+				return existingSubscription, nil
+			} else {
+				// 状态为0，重新激活
+				err = tx.Model(&UserSubscription{}).
+					Where("user_id = ? AND subscription_id = ?", userID, existingSubscription.ID).
+					Update("status", 1).Error
+				if err != nil {
+					tx.Rollback()
+					return nil, err
+				}
+				// 提交事务
+				tx.Commit()
+				return existingSubscription, nil
+			}
 		}
 
 		// 创建用户订阅关系

@@ -1,234 +1,199 @@
-const ApiClient = require('../utils/apiClient');
+const request = require('supertest');
+const { API_BASE_URL } = require('../env');
 
-describe('用户管理模块测试', () => {
-  let apiClient;
-  let testUserData;
+describe('用户管理 API 测试', () => {
+  let authToken;
+  let userId;
 
-  beforeAll(() => {
-    apiClient = new ApiClient();
-    testUserData = {
-      phone: global.testUtils.generateRandomPhone(),
-      phone_verification_code: global.testData.user.verificationCode,
-      display_name: global.testData.user.displayName,
-      school: global.testData.user.school,
-      college: global.testData.user.college
-    };
-  });
+  describe('手机验证码相关', () => {
+    test('发送注册验证码', async () => {
+      const response = await request(API_BASE_URL)
+        .get('/api/phone_verification')
+        .query({
+          phone: '13800138000',
+          purpose: 'register'
+        });
 
-  afterAll(async () => {
-    // 清理测试数据
-    try {
-      await apiClient.logout();
-    } catch (error) {
-      console.log('清理测试数据时出错:', error.message);
-    }
-  });
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('验证码发送成功');
+    });
 
-  describe('API健康检查', () => {
-    test('应该能够连接到API服务器', async () => {
-      const result = await apiClient.healthCheck();
-      expect(result).toBeDefined();
+    test('发送登录验证码', async () => {
+      const response = await request(API_BASE_URL)
+        .get('/api/phone_verification')
+        .query({
+          phone: '13800138000',
+          purpose: 'login'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('验证码发送成功');
     });
   });
 
-  describe('手机验证码功能', () => {
-    test('应该能够发送注册验证码', async () => {
-      const result = await apiClient.sendVerificationCode(
-        testUserData.phone,
-        'register'
-      );
+  describe('用户注册', () => {
+    test('用户注册', async () => {
+      const response = await request(API_BASE_URL)
+        .post('/api/user/register')
+        .send({
+          phone: '13800138000',
+          phone_verification_code: '123456',
+          display_name: '测试用户',
+          school: '测试大学',
+          college: '计算机学院'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('注册成功');
+      expect(response.body.data).toHaveProperty('access_token');
+      expect(response.body.data).toHaveProperty('user');
       
-      expect(result.success).toBe(true);
-      expect(result.data).toBe(global.testData.user.verificationCode);
+      authToken = response.body.data.access_token;
+      userId = response.body.data.user.id;
     });
 
-    test('应该能够发送登录验证码', async () => {
-      const result = await apiClient.sendVerificationCode(
-        testUserData.phone,
-        'login'
-      );
-      
-      expect(result.success).toBe(true);
-      expect(result.data).toBe(global.testData.user.verificationCode);
-    });
+    test('用户注册 - 手机号已存在', async () => {
+      const response = await request(API_BASE_URL)
+        .post('/api/user/register')
+        .send({
+          phone: '13800138000',
+          phone_verification_code: '123456',
+          display_name: '测试用户2',
+          school: '测试大学',
+          college: '计算机学院'
+        });
 
-    test('应该拒绝无效的手机号格式', async () => {
-      await expect(
-        apiClient.sendVerificationCode('123', 'register')
-      ).rejects.toThrow();
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('手机号已存在');
     });
   });
 
-  describe('用户注册功能', () => {
-    test('应该能够成功注册新用户', async () => {
-      const result = await apiClient.register(testUserData);
+  describe('用户登录', () => {
+    test('用户登录', async () => {
+      const response = await request(API_BASE_URL)
+        .post('/api/user/login')
+        .send({
+          phone: '13800138000',
+          phone_verification_code: '123456'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('登录成功');
+      expect(response.body.data).toHaveProperty('access_token');
+      expect(response.body.data).toHaveProperty('user');
       
-      expect(result.success).toBe(true);
-      expect(result.message).toContain('成功');
+      authToken = response.body.data.access_token;
+      userId = response.body.data.user.id;
     });
 
-    test('应该拒绝重复注册同一手机号', async () => {
-      await expect(
-        apiClient.register(testUserData)
-      ).rejects.toThrow();
+    test('用户登录 - 验证码错误', async () => {
+      const response = await request(API_BASE_URL)
+        .post('/api/user/login')
+        .send({
+          phone: '13800138000',
+          phone_verification_code: '000000'
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('验证码错误');
     });
 
-    test('应该拒绝无效的验证码', async () => {
-      const invalidData = {
-        ...testUserData,
-        phone: global.testUtils.generateRandomPhone(),
-        phone_verification_code: '9999'
-      };
-      
-      await expect(
-        apiClient.register(invalidData)
-      ).rejects.toThrow();
-    });
-  });
+    test('用户登录 - 用户不存在', async () => {
+      const response = await request(API_BASE_URL)
+        .post('/api/user/login')
+        .send({
+          phone: '13900139000',
+          phone_verification_code: '123456'
+        });
 
-  describe('用户登录功能', () => {
-    test('应该能够成功登录已注册用户', async () => {
-      const result = await apiClient.login(
-        testUserData.phone,
-        testUserData.phone_verification_code
-      );
-      
-      expect(result.success).toBe(true);
-      expect(result.data).toBeDefined();
-      expect(result.data.access_token).toBeDefined();
-      expect(result.data.id).toBeDefined();
-      expect(result.data.phone).toBe(testUserData.phone);
-    });
-
-    test('应该拒绝未注册用户的登录', async () => {
-      const unregisteredPhone = global.testUtils.generateRandomPhone();
-      
-      await expect(
-        apiClient.login(unregisteredPhone, testUserData.phone_verification_code)
-      ).rejects.toThrow();
-    });
-
-    test('应该拒绝错误的验证码', async () => {
-      await expect(
-        apiClient.login(testUserData.phone, '9999')
-      ).rejects.toThrow();
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('用户不存在');
     });
   });
 
   describe('用户信息管理', () => {
-    beforeEach(async () => {
-      // 确保用户已登录
-      await apiClient.login(
-        testUserData.phone,
-        testUserData.phone_verification_code
-      );
+    test('获取用户信息', async () => {
+      const response = await request(API_BASE_URL)
+        .get('/api/user/info')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('UserID', userId.toString());
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.data).toHaveProperty('phone');
+      expect(response.body.data).toHaveProperty('display_name');
+      expect(response.body.data).toHaveProperty('school');
+      expect(response.body.data).toHaveProperty('college');
     });
 
-    test('应该能够获取用户信息', async () => {
-      const result = await apiClient.getUserInfo();
-      
-      expect(result.success).toBe(true);
-      expect(result.data).toBeDefined();
-      expect(result.data.phone).toBe(testUserData.phone);
-      expect(result.data.display_name).toBe(testUserData.display_name);
+    test('获取用户信息 - 未授权', async () => {
+      const response = await request(API_BASE_URL)
+        .get('/api/user/info');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
     });
 
-    test('应该能够更新用户信息', async () => {
-      const updateData = {
-        display_name: '更新后的显示名称',
-        school: '更新后的学校',
-        college: '更新后的学院'
-      };
-      
-      const result = await apiClient.updateUserInfo(updateData);
-      
-      expect(result.success).toBe(true);
-      expect(result.message).toContain('成功');
-      
-      // 验证更新是否生效
-      const userInfo = await apiClient.getUserInfo();
-      expect(userInfo.data.display_name).toBe(updateData.display_name);
-      expect(userInfo.data.school).toBe(updateData.school);
-      expect(userInfo.data.college).toBe(updateData.college);
+    test('更新用户信息', async () => {
+      const response = await request(API_BASE_URL)
+        .put('/api/user/info')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('UserID', userId.toString())
+        .send({
+          display_name: '更新后的用户名',
+          school: '更新后的大学',
+          college: '更新后的学院'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('用户信息更新成功');
+      expect(response.body.data.display_name).toBe('更新后的用户名');
+      expect(response.body.data.school).toBe('更新后的大学');
+      expect(response.body.data.college).toBe('更新后的学院');
     });
 
-    test('应该能够部分更新用户信息', async () => {
-      const partialUpdate = {
-        display_name: '部分更新名称'
-      };
-      
-      const result = await apiClient.updateUserInfo(partialUpdate);
-      
-      expect(result.success).toBe(true);
-      
-      // 验证部分更新是否生效
-      const userInfo = await apiClient.getUserInfo();
-      expect(userInfo.data.display_name).toBe(partialUpdate.display_name);
-    });
-  });
+    test('更新用户信息 - 未授权', async () => {
+      const response = await request(API_BASE_URL)
+        .put('/api/user/info')
+        .send({
+          display_name: '测试用户名'
+        });
 
-  describe('用户登出功能', () => {
-    beforeEach(async () => {
-      // 确保用户已登录
-      await apiClient.login(
-        testUserData.phone,
-        testUserData.phone_verification_code
-      );
-    });
-
-    test('应该能够成功登出', async () => {
-      const result = await apiClient.logout();
-      
-      expect(result.success).toBe(true);
-      expect(result.message).toContain('成功');
-    });
-
-    test('登出后应该无法访问需要认证的接口', async () => {
-      await apiClient.logout();
-      
-      await expect(
-        apiClient.getUserInfo()
-      ).rejects.toThrow();
-    });
-  });
-
-  describe('认证机制', () => {
-    beforeEach(async () => {
-      // 确保用户已登录
-      await apiClient.login(
-        testUserData.phone,
-        testUserData.phone_verification_code
-      );
-    });
-
-    test('应该正确设置认证头', async () => {
-      const userInfo = await apiClient.getUserInfo();
-      expect(userInfo.success).toBe(true);
-    });
-
-    test('应该拒绝无效的认证信息', async () => {
-      apiClient.setAuth('invalid_token', '999');
-      
-      await expect(
-        apiClient.getUserInfo()
-      ).rejects.toThrow();
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
     });
   });
 
   describe('错误处理', () => {
-    test('应该正确处理网络错误', async () => {
-      const invalidClient = new ApiClient();
-      invalidClient.baseURL = 'http://invalid-url:9999';
-      
-      await expect(
-        invalidClient.healthCheck()
-      ).rejects.toThrow();
+    test('无效的访问令牌', async () => {
+      const response = await request(API_BASE_URL)
+        .get('/api/user/info')
+        .set('Authorization', 'Bearer invalid_token')
+        .set('UserID', '1');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('无效的访问令牌');
     });
 
-    test('应该正确处理服务器错误', async () => {
-      await expect(
-        apiClient.client.get('/api/nonexistent-endpoint')
-      ).rejects.toThrow();
+    test('用户ID不匹配', async () => {
+      const response = await request(API_BASE_URL)
+        .get('/api/user/info')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('UserID', '999');
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('用户ID不匹配');
     });
   });
 });

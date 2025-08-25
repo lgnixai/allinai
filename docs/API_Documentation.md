@@ -213,7 +213,7 @@ GET /api/phone_verification?phone=13800138000&purpose=register
     ],
     "total": 1,
     "page": 1,
-    "size": 10
+    "page_size": 10
   }
 }
 ```
@@ -317,7 +317,9 @@ GET /api/phone_verification?phone=13800138000&purpose=register
       }
     ],
     "total": 2,
-    "topic_id": 1
+    "topic_id": 1, 
+    "page": 1,
+    "page_size": 10
   }
 }
 ```
@@ -430,27 +432,44 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 }
 ```
 
-### 3.3 更新订阅
+[//]: # ()
+[//]: # (### 3.3 更新订阅)
 
-**接口地址**: `PUT /api/subscriptions/{id}`
+[//]: # ()
+[//]: # (**接口地址**: `PUT /api/subscriptions/{id}`)
 
-**请求头**: 需要认证token和UserID
+[//]: # ()
+[//]: # (**请求头**: 需要认证token和UserID)
 
-**请求参数**:
-```json
-{
-  "topic_name": "更新后的技术订阅",
-  "topic_description": "更新后的技术相关文章订阅"
-}
-```
+[//]: # ()
+[//]: # (**请求参数**:)
 
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "订阅更新成功"
-}
-```
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "topic_name": "更新后的技术订阅",)
+
+[//]: # (  "topic_description": "更新后的技术相关文章订阅")
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (**响应示例**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "success": true,)
+
+[//]: # (  "message": "订阅更新成功")
+
+[//]: # (})
+
+[//]: # (```)
 
 ### 3.4 取消订阅
 
@@ -466,19 +485,29 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 }
 ```
 
-### 3.5 重新激活订阅
+[//]: # ()
+[//]: # (### 3.5 重新激活订阅)
 
-**接口地址**: `PUT /api/subscriptions/{id}/reactivate`
+[//]: # ()
+[//]: # (**接口地址**: `PUT /api/subscriptions/{id}/reactivate`)
 
-**请求头**: 需要认证token和UserID
+[//]: # ()
+[//]: # (**请求头**: 需要认证token和UserID)
 
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "订阅已重新激活"
-}
-```
+[//]: # ()
+[//]: # (**响应示例**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "success": true,)
+
+[//]: # (  "message": "订阅已重新激活")
+
+[//]: # (})
+
+[//]: # (```)
 
 ### 3.6 获取订阅文章
 
@@ -627,7 +656,7 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 }
 ```
 
-### 4.3 获取推荐页面（后续访问）
+### 4.3 换一批推荐（后续访问）
 
 **接口地址**: `GET /api/user/recommendations/change`
 
@@ -726,102 +755,179 @@ GET /api/phone_verification?phone=13800138000&purpose=register
     "updated_at": "2024-01-01T00:00:00Z"
   }
 }
-
-## 5. 管理员功能 API
-
-### 5.1 创建系统推荐（管理员）
-
-**接口地址**: `POST /api/system-recommendations`
-
-**请求头**: 需要认证token和UserID（管理员权限）
-
-**请求参数**:
-```json
-{
-  "title": "新推荐标题",
-  "description": "推荐描述",
-  "category": "技术",
-  "sort_order": 100
-}
 ```
 
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "推荐创建成功",
-  "data": {
-    "id": 1
-  }
-}
-```
+[//]: # ()
+[//]: # (## 5. 管理员功能 API)
 
-### 5.2 更新系统推荐（管理员）
+[//]: # ()
+[//]: # (### 5.1 创建系统推荐（管理员）)
 
-**接口地址**: `PUT /api/system-recommendations/{id}`
+[//]: # ()
+[//]: # (**接口地址**: `POST /api/system-recommendations`)
 
-**请求头**: 需要认证token和UserID（管理员权限）
+[//]: # ()
+[//]: # (**请求头**: 需要认证token和UserID（管理员权限）)
 
-**请求参数**:
-```json
-{
-  "title": "更新后的标题",
-  "description": "更新后的描述",
-  "category": "技术",
-  "sort_order": 100
-}
-```
+[//]: # ()
+[//]: # (**请求参数**:)
 
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "推荐更新成功"
-}
-```
+[//]: # (```json)
 
-### 5.3 删除系统推荐（管理员）
+[//]: # ({)
 
-**接口地址**: `DELETE /api/system-recommendations/{id}`
+[//]: # (  "title": "新推荐标题",)
 
-**请求头**: 需要认证token和UserID（管理员权限）
+[//]: # (  "description": "推荐描述",)
 
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "推荐删除成功"
-}
-```
+[//]: # (  "category": "技术",)
 
-### 5.4 创建订阅文章（管理员）
+[//]: # (  "sort_order": 100)
 
-**接口地址**: `POST /api/subscriptions/{id}/articles`
+[//]: # (})
 
-**请求头**: 需要认证token和UserID（管理员权限）
+[//]: # (```)
 
-**请求参数**:
-```json
-{
-  "title": "文章标题",
-  "summary": "文章概要",
-  "content": "文章内容",
-  "author": "作者",
-  "published_at": "2024-01-01T00:00:00Z",
-  "article_url": "https://example.com/article"
-}
-```
+[//]: # ()
+[//]: # (**响应示例**:)
 
-**响应示例**:
-```json
-{
-  "success": true,
-  "message": "文章创建成功",
-  "data": {
-    "id": 1
-  }
-}
-```
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "success": true,)
+
+[//]: # (  "message": "推荐创建成功",)
+
+[//]: # (  "data": {)
+
+[//]: # (    "id": 1)
+
+[//]: # (  })
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### 5.2 更新系统推荐（管理员）)
+
+[//]: # ()
+[//]: # (**接口地址**: `PUT /api/system-recommendations/{id}`)
+
+[//]: # ()
+[//]: # (**请求头**: 需要认证token和UserID（管理员权限）)
+
+[//]: # ()
+[//]: # (**请求参数**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "title": "更新后的标题",)
+
+[//]: # (  "description": "更新后的描述",)
+
+[//]: # (  "category": "技术",)
+
+[//]: # (  "sort_order": 100)
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (**响应示例**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "success": true,)
+
+[//]: # (  "message": "推荐更新成功")
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### 5.3 删除系统推荐（管理员）)
+
+[//]: # ()
+[//]: # (**接口地址**: `DELETE /api/system-recommendations/{id}`)
+
+[//]: # ()
+[//]: # (**请求头**: 需要认证token和UserID（管理员权限）)
+
+[//]: # ()
+[//]: # (**响应示例**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "success": true,)
+
+[//]: # (  "message": "推荐删除成功")
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### 5.4 创建订阅文章（管理员）)
+
+[//]: # ()
+[//]: # (**接口地址**: `POST /api/subscriptions/{id}/articles`)
+
+[//]: # ()
+[//]: # (**请求头**: 需要认证token和UserID（管理员权限）)
+
+[//]: # ()
+[//]: # (**请求参数**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "title": "文章标题",)
+
+[//]: # (  "summary": "文章概要",)
+
+[//]: # (  "content": "文章内容",)
+
+[//]: # (  "author": "作者",)
+
+[//]: # (  "published_at": "2024-01-01T00:00:00Z",)
+
+[//]: # (  "article_url": "https://example.com/article")
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (**响应示例**:)
+
+[//]: # (```json)
+
+[//]: # ({)
+
+[//]: # (  "success": true,)
+
+[//]: # (  "message": "文章创建成功",)
+
+[//]: # (  "data": {)
+
+[//]: # (    "id": 1)
+
+[//]: # (  })
+
+[//]: # (})
+
+[//]: # (```)
 
 ## 错误码说明
 

@@ -126,6 +126,68 @@ func DeleteTopic(c *gin.Context) {
 	})
 }
 
+// UpdateTopicName 更新话题名称
+func UpdateTopicName(c *gin.Context) {
+	userID := c.GetInt("id")
+	topicID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "话题ID格式错误",
+		})
+		return
+	}
+
+	var req struct {
+		TopicName string `json:"topic_name" binding:"required,max=100"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "请求参数错误: " + err.Error(),
+		})
+		return
+	}
+
+	// 检查权限
+	topic, err := model.GetTopicByID(topicID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "话题不存在",
+		})
+		return
+	}
+
+	if topic.UserID != userID {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无权限修改此话题",
+		})
+		return
+	}
+
+	// 更新话题名称
+	err = model.UpdateTopicName(topicID, req.TopicName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "更新话题名称失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "话题名称更新成功",
+		"data": gin.H{
+			"id":         topicID,
+			"topic_name": req.TopicName,
+		},
+	})
+}
+
 // GetTopicMessages 获取话题下的消息
 func GetTopicMessages(c *gin.Context) {
 	userID := c.GetInt("id")

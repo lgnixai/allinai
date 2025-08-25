@@ -254,6 +254,7 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			topicRoute.GET("/", controller.GetTopics)                    // 获取话题列表
 			topicRoute.POST("/", controller.CreateTopic)                 // 创建话题
+			topicRoute.PUT("/:id", controller.UpdateTopicName)           // 更新话题名称
 			topicRoute.DELETE("/:id", controller.DeleteTopic)            // 删除话题
 			topicRoute.GET("/:id/messages", controller.GetTopicMessages) // 获取话题下的消息
 			topicRoute.POST("/:id/messages", controller.CreateMessage)   // 发送消息

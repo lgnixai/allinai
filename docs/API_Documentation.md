@@ -242,7 +242,32 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 }
 ```
 
-### 2.3 删除话题
+### 2.3 更新话题名称
+
+**接口地址**: `PUT /api/topics/{id}`
+
+**请求头**: 需要认证token和UserID
+
+**请求参数**:
+```json
+{
+  "topic_name": "新的话题名称"
+}
+```
+
+**响应示例**:
+```json
+{
+  "success": true,
+  "message": "话题名称更新成功",
+  "data": {
+    "id": 1,
+    "topic_name": "新的话题名称"
+  }
+}
+```
+
+### 2.4 删除话题
 
 **接口地址**: `DELETE /api/topics/{id}`
 
@@ -256,7 +281,7 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 }
 ```
 
-### 2.4 获取话题消息
+### 2.5 获取话题消息
 
 **接口地址**: `GET /api/topics/{id}/messages`
 
@@ -297,7 +322,7 @@ GET /api/phone_verification?phone=13800138000&purpose=register
 }
 ```
 
-### 2.5 发送消息
+### 2.6 发送消息
 
 **接口地址**: `POST /api/topics/{id}/messages`
 

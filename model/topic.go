@@ -98,6 +98,11 @@ func DeleteTopic(id int) error {
 	return DB.Model(&Topic{}).Where("id = ?", id).Update("status", 0).Error
 }
 
+// UpdateTopicName 更新话题名称
+func UpdateTopicName(id int, topicName string) error {
+	return DB.Model(&Topic{}).Where("id = ?", id).Update("topic_name", topicName).Error
+}
+
 // GetTopicMessages 获取话题下的消息
 func GetTopicMessages(topicID int, page, pageSize int) ([]Message, int64, error) {
 	var messages []Message

@@ -294,6 +294,43 @@
 					"response": []
 				},
 				{
+					"name": "更新话题名称",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "UserID",
+								"value": "{{user_id}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic_name\": \"新的话题名称\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/topics/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"topics",
+								"1"
+							]
+						},
+						"description": "更新话题名称"
+					},
+					"response": []
+				},
+				{
 					"name": "删除话题",
 					"request": {
 						"method": "DELETE",

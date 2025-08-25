@@ -347,7 +347,7 @@ func GetSubscriptionArticles(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权限和订阅状态
 	subscription, err := model.GetSubscriptionByID(subscriptionID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -361,6 +361,17 @@ func GetSubscriptionArticles(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "无权限查看此订阅的文章",
+		})
+		return
+	}
+
+
+
+	// 检查订阅是否被取消
+	if subscription.Status == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "订阅已取消，无法查看文章",
 		})
 		return
 	}

@@ -45,6 +45,34 @@ func GetSystemRecommendations(page, pageSize int) ([]SystemRecommendation, int64
 	return recommendations, total, nil
 }
 
+// SearchSystemRecommendations 搜索系统推荐
+func SearchSystemRecommendations(keyword string, page, pageSize int) ([]SystemRecommendation, int64, error) {
+	var recommendations []SystemRecommendation
+	var total int64
+
+	// 构建搜索条件
+	searchCondition := "status = 1 AND (title LIKE ? OR description LIKE ? OR category LIKE ?)"
+	searchPattern := "%" + keyword + "%"
+
+	// 获取总数
+	err := DB.Model(&SystemRecommendation{}).
+		Where(searchCondition, searchPattern, searchPattern, searchPattern).
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	offset := (page - 1) * pageSize
+	err = DB.Where(searchCondition, searchPattern, searchPattern, searchPattern).
+		Order("sort_order DESC, subscription_count DESC, created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&recommendations).Error
+
+	return recommendations, total, nil
+}
+
 // GetSystemRecommendationByID 根据ID获取系统推荐
 func GetSystemRecommendationByID(id int) (*SystemRecommendation, error) {
 	var recommendation SystemRecommendation

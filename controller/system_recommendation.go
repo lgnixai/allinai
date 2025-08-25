@@ -284,3 +284,64 @@ func DeleteSystemRecommendation(c *gin.Context) {
 		"message": "推荐删除成功",
 	})
 }
+
+// SearchSystemRecommendations 搜索系统推荐
+func SearchSystemRecommendations(c *gin.Context) {
+	// 获取搜索关键字
+	keyword := c.Query("keyword")
+	if keyword == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "搜索关键字不能为空",
+		})
+		return
+	}
+
+	// 获取分页参数
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	// 搜索推荐列表
+	recommendations, total, err := model.SearchSystemRecommendations(keyword, page, pageSize)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "搜索推荐失败: " + err.Error(),
+		})
+		return
+	}
+
+	// 转换为响应格式
+	var response dto.SystemRecommendationListResponse
+	response.Total = total
+	response.Page = page
+	response.PageSize = pageSize
+
+	for _, rec := range recommendations {
+		response.Recommendations = append(response.Recommendations, dto.SystemRecommendationResponse{
+			ID:                rec.ID,
+			Title:             rec.Title,
+			Description:       rec.Description,
+			Category:          rec.Category,
+			SubscriptionCount: rec.SubscriptionCount,
+			ArticleCount:      rec.ArticleCount,
+			Status:            rec.Status,
+			SortOrder:         rec.SortOrder,
+			CreatedAt:         rec.CreatedAt,
+			UpdatedAt:         rec.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    response,
+		"keyword": keyword,
+	})
+}

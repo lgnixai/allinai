@@ -8,6 +8,7 @@
 3. 完善订阅管理功能
 4. 增加文章概要字段
 5. 新增管理员功能接口
+6. 新增话题管理功能增强
 
 ## 详细更新内容
 
@@ -200,6 +201,56 @@
 - 新增字段为可选字段，不影响现有功能
 - 认证方式保持不变，只是明确了格式要求
 
+### 6. 话题管理功能增强
+
+#### 新增接口
+1. **更新话题名称**
+   - `PUT /api/topics/{id}`
+   - 更新指定话题的名称
+   - 需要话题所有者权限
+
+#### 功能特性
+- **权限验证**: 确保只有话题所有者可以修改话题名称
+- **参数验证**: 验证话题名称长度（最大100字符）
+- **错误处理**: 完整的错误处理和响应
+- **响应格式**: 返回更新后的话题ID和名称
+
+#### 请求示例
+```bash
+curl -X PUT \
+  -H "Authorization: Bearer <access_token>" \
+  -H "UserID: <user_id>" \
+  -H "Content-Type: application/json" \
+  -d '{"topic_name": "新的话题名称"}' \
+  "http://localhost:9999/api/topics/1"
+```
+
+#### 响应示例
+```json
+{
+  "success": true,
+  "message": "话题名称更新成功",
+  "data": {
+    "id": 1,
+    "topic_name": "新的话题名称"
+  }
+}
+```
+
+#### 错误处理
+- **400**: 请求参数错误（话题名称格式不正确）
+- **401**: 未授权，认证失败
+- **403**: 无权限修改此话题
+- **404**: 话题不存在
+
+#### 相关文件更新
+- `controller/topic.go` - 新增 `UpdateTopicName` 控制器函数
+- `model/topic.go` - 新增 `UpdateTopicName` 模型函数
+- `router/api-router.go` - 新增PUT路由配置
+- `docs/API_Documentation.md` - 更新API文档
+- `docs/html/API_Documentation.md` - 更新HTML版本文档
+- `postman/One-API_Collection.json` - 更新Postman集合
+
 ## 后续计划
 
 1. 添加更多系统推荐分类
@@ -207,4 +258,6 @@
 3. 增加用户偏好设置
 4. 支持文章收藏功能
 5. 添加消息推送功能
+6. 支持话题分类和标签
+7. 增加话题搜索功能
 

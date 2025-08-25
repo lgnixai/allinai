@@ -326,7 +326,7 @@
 								"1"
 							]
 						},
-						"description": "更新话题名称"
+						"description": "更新指定话题的名称，需要话题所有者权限"
 					},
 					"response": []
 				},
@@ -355,7 +355,7 @@
 								"{{topic_id}}"
 							]
 						},
-						"description": "删除指定话题"
+						"description": "删除指定话题，需要话题所有者权限（软删除）"
 					},
 					"response": []
 				},
@@ -395,7 +395,7 @@
 								}
 							]
 						},
-						"description": "获取指定话题的聊天记录"
+						"description": "获取指定话题的聊天记录，支持分页查询"
 					},
 					"response": []
 				},
@@ -433,7 +433,7 @@
 								"messages"
 							]
 						},
-						"description": "在指定话题中发送消息。当topic_id为0时，会自动创建新话题"
+						"description": "在指定话题中发送消息，自动生成AI回复。当topic_id为0时，会自动创建新话题"
 					},
 					"response": []
 				},

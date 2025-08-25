@@ -162,3 +162,53 @@ func CreateSubscriptionArticle(article *SubscriptionArticle) error {
 func DeleteSubscriptionArticle(id int) error {
 	return DB.Model(&SubscriptionArticle{}).Where("id = ?", id).Update("status", 0).Error
 }
+
+// GetAllSubscriptionArticles 获取所有订阅文章（分页）
+func GetAllSubscriptionArticles(page, pageSize int) ([]SubscriptionArticle, int64, error) {
+	var articles []SubscriptionArticle
+	var total int64
+
+	// 获取总数
+	err := DB.Model(&SubscriptionArticle{}).
+		Where("status = 1").
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	offset := (page - 1) * pageSize
+	err = DB.Where("status = 1").
+		Order("published_at DESC, created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&articles).Error
+
+	return articles, total, nil
+}
+
+// GetAllSubscriptionArticlesWithSubscription 获取所有订阅文章（包含订阅信息）
+func GetAllSubscriptionArticlesWithSubscription(page, pageSize int) ([]SubscriptionArticle, int64, error) {
+	var articles []SubscriptionArticle
+	var total int64
+
+	// 获取总数
+	err := DB.Model(&SubscriptionArticle{}).
+		Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
+		Where("subscription_articles.status = 1 AND subscriptions.status = 1").
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	offset := (page - 1) * pageSize
+	err = DB.Joins("JOIN subscriptions ON subscription_articles.subscription_id = subscriptions.id").
+		Where("subscription_articles.status = 1 AND subscriptions.status = 1").
+		Order("subscription_articles.published_at DESC, subscription_articles.created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&articles).Error
+
+	return articles, total, nil
+}

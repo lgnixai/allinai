@@ -43,14 +43,14 @@ func authHelper(c *gin.Context, minRole int) {
 		}
 		user := model.ValidateAccessToken(accessToken)
 		if user != nil && user.Username != "" {
-					if !validUserInfo(user.Username, user.Role) {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"message": "无权进行此操作，用户信息无效",
-			})
-			c.Abort()
-			return
-		}
+			if !validUserInfo(user.Username, user.Role) {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"success": false,
+					"message": "无权进行此操作，用户信息无效",
+				})
+				c.Abort()
+				return
+			}
 			// Token is valid
 			username = user.Username
 			role = user.Role

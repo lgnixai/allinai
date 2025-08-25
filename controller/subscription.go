@@ -407,6 +407,56 @@ func GetSubscriptionArticles(c *gin.Context) {
 	})
 }
 
+// GetAllSubscriptionArticles 获取所有订阅文章
+func GetAllSubscriptionArticles(c *gin.Context) {
+	// 获取分页参数
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+	
+	// 获取文章列表
+	articles, total, err := model.GetAllSubscriptionArticles(page, pageSize)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "获取文章列表失败: " + err.Error(),
+		})
+		return
+	}
+	
+	// 转换为响应格式
+	var response dto.SubscriptionArticleListResponse
+	response.Total = total
+	response.Page = page
+	response.PageSize = pageSize
+	
+	for _, article := range articles {
+		response.Articles = append(response.Articles, dto.SubscriptionArticleResponse{
+			ID:             article.ID,
+			SubscriptionID: article.SubscriptionID,
+			Title:          article.Title,
+			Content:        article.Content,
+			Author:         article.Author,
+			PublishedAt:    article.PublishedAt,
+			ArticleURL:     article.ArticleURL,
+			CreatedAt:      article.CreatedAt,
+			UpdatedAt:      article.UpdatedAt,
+			Status:         article.Status,
+		})
+	}
+	
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    response,
+	})
+}
+
 // CreateSubscriptionArticle 创建订阅文章（管理员功能）
 func CreateSubscriptionArticle(c *gin.Context) {
 	// 检查管理员权限

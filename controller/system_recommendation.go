@@ -345,3 +345,79 @@ func SearchSystemRecommendations(c *gin.Context) {
 		"keyword": keyword,
 	})
 }
+
+// GetWelcomePage 获取欢迎页面（首次访问）
+func GetWelcomePage(c *gin.Context) {
+	// 获取4个随机推荐
+	recommendations, err := model.GetRandomSystemRecommendations(4)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "获取推荐失败: " + err.Error(),
+		})
+		return
+	}
+
+	// 欢迎消息
+	welcomeMessage := "Hi, 杨博士,我是 Moyo 安排给你的科研合伙人, 我叫IU。今天是咱们俩第一次见面,为了可以更好的开展后面的工作,给你初步介绍下我现在可以做的事情。因为还不知道你想让我做什么,我根据你的专业帮你选择了几个可能感兴趣的话题。"
+
+	// 转换为响应格式
+	var response dto.WelcomePageResponse
+	response.WelcomeMessage = welcomeMessage
+
+	for _, rec := range recommendations {
+		response.Recommendations = append(response.Recommendations, dto.SystemRecommendationResponse{
+			ID:                rec.ID,
+			Title:             rec.Title,
+			Description:       rec.Description,
+			Category:          rec.Category,
+			SubscriptionCount: rec.SubscriptionCount,
+			ArticleCount:      rec.ArticleCount,
+			Status:            rec.Status,
+			SortOrder:         rec.SortOrder,
+			CreatedAt:         rec.CreatedAt,
+			UpdatedAt:         rec.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    response,
+	})
+}
+
+// GetRecommendationPage 获取推荐页面（后续访问）
+func GetRecommendationPage(c *gin.Context) {
+	// 获取4个随机推荐
+	recommendations, err := model.GetRandomSystemRecommendations(4)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "获取推荐失败: " + err.Error(),
+		})
+		return
+	}
+
+	// 转换为响应格式
+	var response dto.RecommendationPageResponse
+
+	for _, rec := range recommendations {
+		response.Recommendations = append(response.Recommendations, dto.SystemRecommendationResponse{
+			ID:                rec.ID,
+			Title:             rec.Title,
+			Description:       rec.Description,
+			Category:          rec.Category,
+			SubscriptionCount: rec.SubscriptionCount,
+			ArticleCount:      rec.ArticleCount,
+			Status:            rec.Status,
+			SortOrder:         rec.SortOrder,
+			CreatedAt:         rec.CreatedAt,
+			UpdatedAt:         rec.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    response,
+	})
+}

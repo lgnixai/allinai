@@ -73,6 +73,18 @@ func SearchSystemRecommendations(keyword string, page, pageSize int) ([]SystemRe
 	return recommendations, total, nil
 }
 
+// GetRandomSystemRecommendations 获取随机系统推荐
+func GetRandomSystemRecommendations(limit int) ([]SystemRecommendation, error) {
+	var recommendations []SystemRecommendation
+	
+	err := DB.Where("status = 1").
+		Order("RANDOM()").
+		Limit(limit).
+		Find(&recommendations).Error
+
+	return recommendations, err
+}
+
 // GetSystemRecommendationByID 根据ID获取系统推荐
 func GetSystemRecommendationByID(id int) (*SystemRecommendation, error) {
 	var recommendation SystemRecommendation

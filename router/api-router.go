@@ -238,6 +238,8 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/recommendations", controller.GetSystemRecommendations)                    // 获取系统推荐列表（公开接口）
 		apiRouter.GET("/recommendations/search", controller.SearchSystemRecommendations)          // 搜索系统推荐（公开接口）
 		apiRouter.GET("/recommendations/:id", controller.GetSystemRecommendationByID)             // 获取单个系统推荐（公开接口）
+		apiRouter.GET("/welcome", controller.GetWelcomePage)                                      // 获取欢迎页面（首次访问）
+		apiRouter.GET("/recommendations/random", controller.GetRecommendationPage)                // 获取推荐页面（后续访问）
 
 		// 系统推荐管理路由（管理员功能）
 		recommendationRoute := apiRouter.Group("/recommendations")

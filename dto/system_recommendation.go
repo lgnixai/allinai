@@ -40,3 +40,14 @@ type UpdateSystemRecommendationRequest struct {
 	Status      int    `json:"status"`
 	SortOrder   int    `json:"sort_order"`
 }
+
+// WelcomePageResponse 欢迎页面响应
+type WelcomePageResponse struct {
+	WelcomeMessage string                        `json:"welcome_message"`
+	Recommendations []SystemRecommendationResponse `json:"recommendations"`
+}
+
+// RecommendationPageResponse 推荐页面响应
+type RecommendationPageResponse struct {
+	Recommendations []SystemRecommendationResponse `json:"recommendations"`
+}

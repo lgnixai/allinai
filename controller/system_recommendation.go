@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -348,6 +349,21 @@ func SearchSystemRecommendations(c *gin.Context) {
 
 // GetWelcomePage 获取欢迎页面（首次访问）
 func GetWelcomePage(c *gin.Context) {
+	// 获取当前用户信息
+	userID := c.GetInt("user_id")
+	var displayName string
+	if userID > 0 {
+		user, err := model.GetUserById(userID, false)
+		if err == nil && user != nil {
+			displayName = user.DisplayName
+		}
+	}
+	
+	// 如果获取不到用户信息，使用默认称呼
+	if displayName == "" {
+		displayName = "朋友"
+	}
+
 	// 获取4个随机推荐
 	recommendations, err := model.GetRandomSystemRecommendations(4)
 	if err != nil {
@@ -359,7 +375,7 @@ func GetWelcomePage(c *gin.Context) {
 	}
 
 	// 欢迎消息
-	welcomeMessage := "Hi, 杨博士,我是 Moyo 安排给你的科研合伙人, 我叫IU。今天是咱们俩第一次见面,为了可以更好的开展后面的工作,给你初步介绍下我现在可以做的事情。因为还不知道你想让我做什么,我根据你的专业帮你选择了几个可能感兴趣的话题。"
+	welcomeMessage := fmt.Sprintf("Hi, %s,我是 Moyo 安排给你的科研合伙人, 我叫IU。今天是咱们俩第一次见面,为了可以更好的开展后面的工作,给你初步介绍下我现在可以做的事情。因为还不知道你想让我做什么,我根据你的专业帮你选择了几个可能感兴趣的话题。", displayName)
 
 	// 转换为响应格式
 	var response dto.WelcomePageResponse

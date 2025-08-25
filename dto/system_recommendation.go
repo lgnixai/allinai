@@ -26,10 +26,10 @@ type SystemRecommendationListResponse struct {
 
 // CreateSystemRecommendationRequest 创建系统推荐请求
 type CreateSystemRecommendationRequest struct {
-	Title     string `json:"title" binding:"required,max=255"`
+	Title       string `json:"title" binding:"required,max=255"`
 	Description string `json:"description" binding:"max=1000"`
-	Category  string `json:"category" binding:"max=100"`
-	SortOrder int    `json:"sort_order"`
+	Category    string `json:"category" binding:"max=100"`
+	SortOrder   int    `json:"sort_order"`
 }
 
 // UpdateSystemRecommendationRequest 更新系统推荐请求
@@ -43,7 +43,7 @@ type UpdateSystemRecommendationRequest struct {
 
 // WelcomePageResponse 欢迎页面响应
 type WelcomePageResponse struct {
-	WelcomeMessage string                        `json:"welcome_message"`
+	WelcomeMessage  string                         `json:"welcome_message"`
 	Recommendations []SystemRecommendationResponse `json:"recommendations"`
 }
 

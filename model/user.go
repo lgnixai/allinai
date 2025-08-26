@@ -46,6 +46,7 @@ type User struct {
 	School                string         `json:"school" gorm:"type:varchar(100);column:school" validate:"max=100"`
 	College               string         `json:"college" gorm:"type:varchar(100);column:college" validate:"max=100"`
 	Phone                 string         `json:"phone" gorm:"type:varchar(20);column:phone;index" validate:"required,len=11"`
+    IsFirstUse            int            `json:"is_first_use" gorm:"type:int;default:1;column:is_first_use"` // 1: 首次使用, 0: 非首次
 }
 
 func (user *User) ToBaseUser() *UserBase {

@@ -69,6 +69,9 @@ func CreateTopic(c *gin.Context) {
 		return
 	}
 
+	// 首次创建话题后，将用户 is_first_use 从 1 更新为 0（仅当当前值为 1 时）
+	_ = model.MarkUserFirstUseIfNeeded(userID)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "话题创建成功",

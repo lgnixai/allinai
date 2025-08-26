@@ -105,7 +105,6 @@ func setupLogin(user *model.User, c *gin.Context) {
 			return
 		}
 	}
-
 	cleanUser := model.User{
 		Id:          user.Id,
 		Username:    user.Username,
@@ -117,6 +116,7 @@ func setupLogin(user *model.User, c *gin.Context) {
 		College:     user.College,
 		Phone:       user.Phone,
 		AccessToken: user.AccessToken, // 包含access_token
+		IsFirstUse:  user.IsFirstUse,  // 包含首次使用标识
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "",

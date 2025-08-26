@@ -117,10 +117,24 @@ GET /api/phone_verification?phone=13800138000&purpose=register
     "school": "测试大学",
     "college": "计算机学院",
     "phone": "13800138000",
-    "access_token": "your_access_token_here"
+    "access_token": "your_access_token_here",
+    "is_first_use": 1
   }
 }
 ```
+
+**响应字段说明**:
+- `id`: 用户ID
+- `username`: 用户名
+- `display_name`: 显示名称
+- `role`: 用户角色 (1: 普通用户, 100: 管理员)
+- `status`: 用户状态 (1: 正常, 0: 禁用)
+- `group`: 用户组
+- `school`: 学校名称
+- `college`: 学院名称
+- `phone`: 手机号
+- `access_token`: 访问令牌
+- `is_first_use`: 首次使用标识 (1: 首次使用, 0: 非首次使用)
 
 ### 1.4 获取用户信息
 
@@ -142,7 +156,8 @@ GET /api/phone_verification?phone=13800138000&purpose=register
     "school": "测试大学",
     "college": "计算机学院",
     "phone": "13800138000",
-    "access_token": "your_access_token_here"
+    "access_token": "your_access_token_here",
+    "is_first_use": 1
   }
 }
 ```

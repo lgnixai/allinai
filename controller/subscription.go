@@ -334,6 +334,11 @@ func GetSubscriptionArticles(c *gin.Context) {
 			Author:         article.Author,
 			PublishedAt:    article.PublishedAt,
 			ArticleURL:     article.ArticleURL,
+			KeyPoints:      article.KeyPoints,
+			JournalName:    article.JournalName,
+			ReadCount:      article.ReadCount,
+			CitationCount:  article.CitationCount,
+			Rating:         article.Rating,
 			CreatedAt:      article.CreatedAt,
 			UpdatedAt:      article.UpdatedAt,
 			Status:         article.Status,
@@ -395,6 +400,11 @@ func GetAllSubscriptionArticles(c *gin.Context) {
 			Author:         article.Author,
 			PublishedAt:    article.PublishedAt,
 			ArticleURL:     article.ArticleURL,
+			KeyPoints:      article.KeyPoints,
+			JournalName:    article.JournalName,
+			ReadCount:      article.ReadCount,
+			CitationCount:  article.CitationCount,
+			Rating:         article.Rating,
 			CreatedAt:      article.CreatedAt,
 			UpdatedAt:      article.UpdatedAt,
 			Status:         article.Status,
@@ -456,6 +466,11 @@ func CreateSubscriptionArticle(c *gin.Context) {
 		Author:         req.Author,
 		PublishedAt:    &req.PublishedAt,
 		ArticleURL:     req.ArticleURL,
+		KeyPoints:      req.KeyPoints,
+		JournalName:    req.JournalName,
+		ReadCount:      req.ReadCount,
+		CitationCount:  req.CitationCount,
+		Rating:         req.Rating,
 		Status:         1,
 	}
 
@@ -498,6 +513,27 @@ func generateMockArticles(subscriptionID int, topicName string) error {
 		"行业分析师",
 		"技术博主",
 		"研究学者",
+	}
+
+	// 模拟期刊名称
+	journals := []string{
+		"计算机科学与技术学报",
+		"软件工程学报",
+		"人工智能研究",
+		"数据科学期刊",
+		"信息技术前沿",
+		"科技创新导报",
+		"数字技术应用",
+		"智能系统学报",
+	}
+
+	// 模拟重点提炼模板
+	keyPointsTemplates := []string{
+		"1. %s技术的核心原理和基本概念\n2. %s在实际项目中的应用场景\n3. %s技术的优势和局限性分析\n4. 学习%s技术的有效方法和路径\n5. %s技术的未来发展趋势预测",
+		"1. %s技术的最新发展动态\n2. %s在行业中的实际应用案例\n3. %s技术的关键创新点\n4. %s技术的性能优化策略\n5. %s技术的安全性和可靠性保障",
+		"1. %s技术的基础知识体系构建\n2. %s技术的实践操作指南\n3. %s技术的常见问题和解决方案\n4. %s技术的学习资源推荐\n5. %s技术的职业发展建议",
+		"1. %s技术的实际应用案例分析\n2. %s技术的项目实施经验总结\n3. %s技术的性能测试和优化\n4. %s技术的团队协作最佳实践\n5. %s技术的质量保证和测试策略",
+		"1. %s技术的项目规划和管理\n2. %s技术的代码质量和维护性\n3. %s技术的性能优化技巧\n4. %s技术的安全防护措施\n5. %s技术的团队技能培训策略",
 	}
 
 	// 模拟概要模板
@@ -591,15 +627,23 @@ func generateMockArticles(subscriptionID int, topicName string) error {
 		titleTemplate := titles[rand.Intn(len(titles))]
 		summaryTemplate := summaries[rand.Intn(len(summaries))]
 		contentTemplate := contents[rand.Intn(len(contents))]
+		keyPointsTemplate := keyPointsTemplates[rand.Intn(len(keyPointsTemplates))]
 		author := authors[rand.Intn(len(authors))]
+		journal := journals[rand.Intn(len(journals))]
 
-		// 生成标题、概要和内容
+		// 生成标题、概要、内容和重点提炼
 		title := fmt.Sprintf(titleTemplate, topicName)
 		summary := fmt.Sprintf(summaryTemplate, topicName, topicName)
 		content := fmt.Sprintf(contentTemplate, topicName)
+		keyPoints := fmt.Sprintf(keyPointsTemplate, topicName, topicName, topicName, topicName, topicName)
 
 		// 随机发布时间（过去30天内）
 		publishedAt := now.AddDate(0, 0, -rand.Intn(30))
+
+		// 生成随机数据
+		readCount := rand.Intn(1000) + 50          // 50-1050次阅读
+		citationCount := rand.Intn(50) + 1         // 1-51次引用
+		rating := float64(rand.Intn(50)+50) / 10.0 // 5.0-10.0分
 
 		article := &model.SubscriptionArticle{
 			SubscriptionID: subscriptionID,
@@ -609,6 +653,11 @@ func generateMockArticles(subscriptionID int, topicName string) error {
 			Author:         author,
 			PublishedAt:    &publishedAt,
 			ArticleURL:     fmt.Sprintf("https://example.com/articles/%d", rand.Intn(10000)),
+			KeyPoints:      keyPoints,
+			JournalName:    journal,
+			ReadCount:      readCount,
+			CitationCount:  citationCount,
+			Rating:         rating,
 			Status:         1,
 		}
 

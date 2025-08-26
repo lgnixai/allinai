@@ -87,8 +87,7 @@ func CreateTablesWithForeignKeys() error {
 			topic_description TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			status INTEGER DEFAULT 1,
-			FOREIGN KEY (create_user_id) REFERENCES users(id) ON DELETE CASCADE
+			status INTEGER DEFAULT 1
 		)`,
 		`CREATE TABLE user_subscriptions (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,6 +108,11 @@ func CreateTablesWithForeignKeys() error {
 			author VARCHAR(100),
 			published_at DATETIME,
 			article_url VARCHAR(500),
+			key_points TEXT,
+			journal_name VARCHAR(200),
+			read_count INTEGER DEFAULT 0,
+			citation_count INTEGER DEFAULT 0,
+			rating DECIMAL(3,1) DEFAULT 0.0,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			status INTEGER DEFAULT 1,

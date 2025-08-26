@@ -496,6 +496,11 @@ GET /api/phone_verification?phone=13800138000&purpose=register
         "author": "作者",
         "published_at": "2024-01-01T00:00:00Z",
         "article_url": "https://example.com/article",
+        "key_points": "1. 要点一\n2. 要点二\n3. 要点三",
+        "journal_name": "计算机科学与技术学报",
+        "read_count": 123,
+        "citation_count": 7,
+        "rating": 8.6,
         "created_at": "2024-01-01T00:00:00Z",
         "updated_at": "2024-01-01T00:00:00Z",
         "status": 1
@@ -535,6 +540,11 @@ GET /api/phone_verification?phone=13800138000&purpose=register
         "author": "作者",
         "published_at": "2024-01-01T00:00:00Z",
         "article_url": "https://example.com/article",
+        "key_points": "1. 要点一\n2. 要点二\n3. 要点三",
+        "journal_name": "计算机科学与技术学报",
+        "read_count": 123,
+        "citation_count": 7,
+        "rating": 8.6,
         "created_at": "2024-01-01T00:00:00Z",
         "updated_at": "2024-01-01T00:00:00Z",
         "status": 1

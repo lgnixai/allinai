@@ -15,7 +15,6 @@ type Subscription struct {
 	Status           int       `json:"status" gorm:"default:1"` // 1: 活跃, 0: 取消
 
 	// 关联字段
-	User         User                  `json:"user" gorm:"foreignKey:CreateUserID"`
 	Articles     []SubscriptionArticle `json:"articles" gorm:"foreignKey:SubscriptionID"`
 	ArticleCount int                   `json:"article_count" gorm:"-"`
 }
@@ -30,9 +29,15 @@ type SubscriptionArticle struct {
 	Author         string     `json:"author" gorm:"size:100"`
 	PublishedAt    *time.Time `json:"published_at"`
 	ArticleURL     string     `json:"article_url" gorm:"size:500"`
-	CreatedAt      time.Time  `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt      time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
-	Status         int        `json:"status" gorm:"default:1"` // 1: 正常, 0: 删除
+	// 新增字段
+	KeyPoints     string    `json:"key_points" gorm:"type:text"`                 // 重点提炼
+	JournalName   string    `json:"journal_name" gorm:"size:200"`                // 期刊名称
+	ReadCount     int       `json:"read_count" gorm:"default:0"`                 // 阅读次数
+	CitationCount int       `json:"citation_count" gorm:"default:0"`             // 引用次数
+	Rating        float64   `json:"rating" gorm:"default:0.0;type:decimal(3,1)"` // 评分
+	CreatedAt     time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt     time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Status        int       `json:"status" gorm:"default:1"` // 1: 正常, 0: 删除
 
 	// 关联字段
 	Subscription Subscription `json:"subscription" gorm:"foreignKey:SubscriptionID"`
@@ -370,7 +375,7 @@ func CreateSubscriptionWithUserRelation(userID int, topicName, topicDescription 
 
 	// 创建新的订阅
 	subscription := &Subscription{
-		CreateUserID:     0, // 订阅本身不关联特定用户
+		CreateUserID:     0, // 订阅本身不关联特定用户，只是记录创建者ID
 		TopicName:        topicName,
 		TopicDescription: topicDescription,
 		Status:           1,

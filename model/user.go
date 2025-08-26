@@ -309,6 +309,7 @@ func (user *User) Insert(inviterId int) error {
 	user.Quota = common.QuotaForNewUser
 	//user.SetAccessToken(common.GetUUID())
 	user.AffCode = common.GetRandomString(4)
+	user.IsFirstUse = 1 // 确保新用户注册时 is_first_use 为 1
 	result := DB.Create(user)
 	if result.Error != nil {
 		return result.Error

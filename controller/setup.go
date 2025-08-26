@@ -133,6 +133,7 @@ func PostSetup(c *gin.Context) {
 			DisplayName: "Root User",
 			AccessToken: nil,
 			Quota:       100000000,
+			IsFirstUse:  1, // 确保root用户 is_first_use 为 1
 		}
 		err = model.DB.Create(&rootUser).Error
 		if err != nil {

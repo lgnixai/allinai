@@ -1,0 +1,22 @@
+{
+  "name": "one-api-first-use-test",
+  "version": "1.0.0",
+  "description": "测试 One API 首次登录 is_first_use 字段问题",
+  "main": "test_first_use_complete.js",
+  "scripts": {
+    "test": "node test_first_use_complete.js",
+    "test-simple": "node test_first_use_login.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "sqlite3": "^5.1.6"
+  },
+  "keywords": [
+    "one-api",
+    "test",
+    "login",
+    "first-use"
+  ],
+  "author": "Test User",
+  "license": "MIT"
+}

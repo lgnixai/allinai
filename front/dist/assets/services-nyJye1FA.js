@@ -1,0 +1,1 @@
+import{r as n,b as t}from"./index-Ii46O6WK.js";async function e(o,i){return n(`${t}/user/login`,{method:"POST",data:o})}async function s(o,i){return n(`${t}/phone_verification`,{method:"GET",params:o})}async function a(o){return n(`${t}/user/logout`,{method:"GET"})}export{e as a,s as f,a as l};

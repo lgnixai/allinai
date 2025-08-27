@@ -23,6 +23,136 @@ func validUserInfo(username string, role int) bool {
 	return true
 }
 
+// WebAuth 专门用于Web界面的session认证
+func WebAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		username := session.Get("phone")
+		role := session.Get("role")
+		id := session.Get("id")
+		status := session.Get("status")
+
+		if username == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "请先登录",
+			})
+			c.Abort()
+			return
+		}
+
+		if status.(int) == common.UserStatusDisabled {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": "用户已被封禁",
+			})
+			c.Abort()
+			return
+		}
+
+		if !validUserInfo(username.(string), role.(int)) {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "用户信息无效",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Set("username", username)
+		c.Set("role", role)
+		c.Set("id", id)
+		c.Set("group", session.Get("group"))
+		c.Set("use_session", true)
+
+		c.Next()
+	}
+}
+
+// APIAuth 专门用于API的token认证
+func APIAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		accessToken := c.Request.Header.Get("Authorization")
+		if accessToken == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "未提供 access token",
+			})
+			c.Abort()
+			return
+		}
+
+		user := model.ValidateAccessToken(accessToken)
+		if user == nil || user.Username == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "access token 无效",
+			})
+			c.Abort()
+			return
+		}
+
+		if !validUserInfo(user.Username, user.Role) {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "用户信息无效",
+			})
+			c.Abort()
+			return
+		}
+
+		if user.Status == common.UserStatusDisabled {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": "用户已被封禁",
+			})
+			c.Abort()
+			return
+		}
+
+		// API调用需要验证UserID header
+		apiUserIdStr := c.Request.Header.Get("UserID")
+		if apiUserIdStr == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "未提供 UserID",
+			})
+			c.Abort()
+			return
+		}
+
+		apiUserId, err := strconv.Atoi(apiUserIdStr)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "UserID 格式错误",
+			})
+			c.Abort()
+			return
+		}
+
+		if user.Id != apiUserId {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "UserID 与登录用户不匹配",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Set("username", user.Username)
+		c.Set("role", user.Role)
+		c.Set("id", user.Id)
+		c.Set("status", user.Status)
+		c.Set("group", user.Group)
+		c.Set("use_access_token", true)
+
+		c.Next()
+	}
+}
+
+// 保留原有的authHelper用于向后兼容，但标记为deprecated
+// Deprecated: 使用 WebAuth() 或 APIAuth() 替代
 func authHelper(c *gin.Context, minRole int) {
 	session := sessions.Default(c)
 	username := session.Get("phone")
@@ -30,6 +160,8 @@ func authHelper(c *gin.Context, minRole int) {
 	id := session.Get("id")
 	status := session.Get("status")
 	useAccessToken := false
+
+	fmt.Println(username, role, status)
 	if username == nil {
 		// Check access token
 		accessToken := c.Request.Header.Get("Authorization")

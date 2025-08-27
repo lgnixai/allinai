@@ -1,0 +1,1 @@
+import{X as r,g as u,A as c}from"./index-Ii46O6WK.js";const s=r("loginState",()=>{const t=u(localStorage.getItem("chat-author-info")),o=c(()=>!!t.value);function a(e){return localStorage.setItem("chat-author-info",e),t.value=e,!0}function n(){localStorage.clear(),t.value=null}return{isLoggedIn:o,authorInfo:t,setAuthTokenAndUserId:a,clearAuthToken:n}});export{s as u};

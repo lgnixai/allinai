@@ -18,7 +18,7 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.POST("/setup", controller.PostSetup)
 		apiRouter.GET("/status", controller.GetStatus)
 		apiRouter.GET("/uptime/status", controller.GetUptimeKumaStatus)
-		apiRouter.GET("/models", middleware.UserAuth(), controller.DashboardListModels)
+		apiRouter.GET("/models", middleware.APIAuth(), controller.DashboardListModels)
 		apiRouter.GET("/status/test", middleware.AdminAuth(), controller.TestStatus)
 		apiRouter.GET("/notice", controller.GetNotice)
 		apiRouter.GET("/about", controller.GetAbout)
@@ -54,7 +54,7 @@ func SetApiRouter(router *gin.Engine) {
 			userRoute.GET("/groups", controller.GetUserGroups)
 
 			selfRoute := userRoute.Group("/")
-			selfRoute.Use(middleware.UserAuth())
+			selfRoute.Use(middleware.APIAuth())
 			{
 				selfRoute.GET("/self/groups", controller.GetUserGroups)
 				selfRoute.GET("/self", controller.GetSelf)
@@ -74,7 +74,7 @@ func SetApiRouter(router *gin.Engine) {
 
 			// 聊天会话相关路由
 			chatSessionRoute := apiRouter.Group("/chat_sessions")
-			chatSessionRoute.Use(middleware.UserAuth())
+			chatSessionRoute.Use(middleware.APIAuth())
 			{
 				chatSessionRoute.POST("/", controller.CreateChatSession)               // 创建会话
 				chatSessionRoute.GET("/:session_id", controller.GetChatSession)        // 获取会话详情
@@ -89,7 +89,7 @@ func SetApiRouter(router *gin.Engine) {
 
 			// 聊天消息相关路由
 			chatMessageRoute := apiRouter.Group("/chat_messages")
-			chatMessageRoute.Use(middleware.UserAuth())
+			chatMessageRoute.Use(middleware.APIAuth())
 			{
 				chatMessageRoute.POST("/", controller.CreateChatMessage)                       // 创建消息
 				chatMessageRoute.GET("/:message_id", controller.GetChatMessage)                // 获取消息详情
@@ -157,7 +157,7 @@ func SetApiRouter(router *gin.Engine) {
 			channelRoute.POST("/copy/:id", controller.CopyChannel)
 		}
 		tokenRoute := apiRouter.Group("/token")
-		tokenRoute.Use(middleware.UserAuth())
+		tokenRoute.Use(middleware.APIAuth())
 		{
 			tokenRoute.GET("/", controller.GetAllTokens)
 			tokenRoute.GET("/search", controller.SearchTokens)
@@ -182,14 +182,14 @@ func SetApiRouter(router *gin.Engine) {
 		logRoute.GET("/", middleware.AdminAuth(), controller.GetAllLogs)
 		logRoute.DELETE("/", middleware.AdminAuth(), controller.DeleteHistoryLogs)
 		logRoute.GET("/stat", middleware.AdminAuth(), controller.GetLogsStat)
-		logRoute.GET("/self/stat", middleware.UserAuth(), controller.GetLogsSelfStat)
+		logRoute.GET("/self/stat", middleware.APIAuth(), controller.GetLogsSelfStat)
 		logRoute.GET("/search", middleware.AdminAuth(), controller.SearchAllLogs)
-		logRoute.GET("/self", middleware.UserAuth(), controller.GetUserLogs)
-		logRoute.GET("/self/search", middleware.UserAuth(), controller.SearchUserLogs)
+		logRoute.GET("/self", middleware.APIAuth(), controller.GetUserLogs)
+		logRoute.GET("/self/search", middleware.APIAuth(), controller.SearchUserLogs)
 
 		dataRoute := apiRouter.Group("/data")
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)
-		dataRoute.GET("/self", middleware.UserAuth(), controller.GetUserQuotaDates)
+		dataRoute.GET("/self", middleware.APIAuth(), controller.GetUserQuotaDates)
 
 		logRoute.Use(middleware.CORS())
 		{
@@ -202,18 +202,18 @@ func SetApiRouter(router *gin.Engine) {
 			groupRoute.GET("/", controller.GetGroups)
 		}
 		mjRoute := apiRouter.Group("/mj")
-		mjRoute.GET("/self", middleware.UserAuth(), controller.GetUserMidjourney)
+		mjRoute.GET("/self", middleware.APIAuth(), controller.GetUserMidjourney)
 		mjRoute.GET("/", middleware.AdminAuth(), controller.GetAllMidjourney)
 
 		taskRoute := apiRouter.Group("/task")
 		{
-			taskRoute.GET("/self", middleware.UserAuth(), controller.GetUserTask)
+			taskRoute.GET("/self", middleware.APIAuth(), controller.GetUserTask)
 			taskRoute.GET("/", middleware.AdminAuth(), controller.GetAllTask)
 		}
 
 		// 订阅相关路由
 		subscriptionRoute := apiRouter.Group("/subscriptions")
-		subscriptionRoute.Use(middleware.UserAuth())
+		subscriptionRoute.Use(middleware.APIAuth())
 		{
 			subscriptionRoute.GET("/", controller.GetUserSubscriptions)                 // 获取用户订阅列表
 			subscriptionRoute.POST("/", controller.CreateSubscription)                  // 创建订阅
@@ -233,11 +233,11 @@ func SetApiRouter(router *gin.Engine) {
 		}
 
 		// 系统推荐路由（用户相关，需要认证）
-		apiRouter.GET("/user/recommendations", middleware.UserAuth(), controller.GetSystemRecommendations)            // 获取系统推荐列表
-		apiRouter.POST("/user/recommendations/search", middleware.UserAuth(), controller.SearchSystemRecommendations) // 搜索系统推荐
-		apiRouter.GET("/user/recommendations/:id", middleware.UserAuth(), controller.GetSystemRecommendationByID)     // 获取单个系统推荐
-		apiRouter.GET("/user/welcome", middleware.UserAuth(), controller.GetWelcomePage)                              // 获取欢迎页面（首次访问）
-		apiRouter.GET("/user/recommendations/change", middleware.UserAuth(), controller.GetRecommendationPage)        // 获取推荐页面（后续访问）
+		apiRouter.GET("/user/recommendations", middleware.APIAuth(), controller.GetSystemRecommendations)            // 获取系统推荐列表
+		apiRouter.POST("/user/recommendations/search", middleware.APIAuth(), controller.SearchSystemRecommendations) // 搜索系统推荐
+		apiRouter.GET("/user/recommendations/:id", middleware.APIAuth(), controller.GetSystemRecommendationByID)     // 获取单个系统推荐
+		apiRouter.GET("/user/welcome", middleware.APIAuth(), controller.GetWelcomePage)                              // 获取欢迎页面（首次访问）
+		apiRouter.GET("/user/recommendations/change", middleware.APIAuth(), controller.GetRecommendationPage)        // 获取推荐页面（后续访问）
 
 		// 系统推荐管理路由（管理员功能）
 		recommendationRoute := apiRouter.Group("/recommendations")
@@ -250,7 +250,7 @@ func SetApiRouter(router *gin.Engine) {
 
 		// 话题相关路由
 		topicRoute := apiRouter.Group("/topics")
-		topicRoute.Use(middleware.UserAuth())
+		topicRoute.Use(middleware.APIAuth())
 		{
 			topicRoute.GET("/", controller.GetTopics) // 获取话题列表
 			topicRoute.POST("/", controller.CreateTopic)
